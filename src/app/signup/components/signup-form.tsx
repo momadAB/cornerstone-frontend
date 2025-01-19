@@ -30,11 +30,9 @@ export default function SignupForm() {
       return;
     }
 
-    // Replace with your signup logic
+    // TODO: Actual signup logic
     try {
-      // Simulate API call
-      console.log({ name, email, password });
-      router.push("/welcome"); // Redirect to a welcome or dashboard page after successful signup
+      router.push("/dashboard"); // Redirect to dashboard
     } catch (err) {
       setError("Failed to sign up");
     } finally {

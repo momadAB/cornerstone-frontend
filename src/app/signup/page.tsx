@@ -1,5 +1,5 @@
 import { AnimatedBackground } from "../../components/animated-background";
-import SignupForm from "./signup-form";
+import SignupForm from "./components/signup-form";
 
 export default function LoginPage() {
   return (

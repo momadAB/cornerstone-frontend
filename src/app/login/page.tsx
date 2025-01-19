@@ -1,4 +1,4 @@
-import LoginForm from "./login-form";
+import LoginForm from "./components/login-form";
 import { AnimatedBackground } from "../../components/animated-background";
 
 export default function LoginPage() {
