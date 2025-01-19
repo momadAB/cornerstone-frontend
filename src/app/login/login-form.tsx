@@ -4,15 +4,16 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,29 +41,42 @@ export default function LoginForm() {
         <Label htmlFor="email" className="text-gold-400">
           Email
         </Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 bg-black/50 border border-gold-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-400 text-white"
-        />
+        <div className="relative">
+          <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-400" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full pl-10 px-3 py-2 bg-black/50 border border-gold-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-400 text-white"
+          />
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="password" className="text-gold-400">
           Password
         </Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 bg-black/50 border border-gold-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-400 text-white"
-        />
+        <div className="relative">
+          <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-400" />
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"} // Toggles between text and password
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full pl-10 px-3 py-2 bg-black/50 border border-gold-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-400 text-white"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)} // Toggle the state
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gold-400 hover:text-gold-500 focus:outline-none"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
       </div>
       <Button
         type="submit"
