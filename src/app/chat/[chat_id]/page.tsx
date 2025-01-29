@@ -88,7 +88,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 px-72">
         {chatData.messages.map((message) => (
           <div
             key={message.id}
@@ -123,7 +123,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="p-4 bg-black">
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 px-72">
           <input
             type="text"
             value={newMessage}

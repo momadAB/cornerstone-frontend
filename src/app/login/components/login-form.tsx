@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { FaIdCard, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { deleteToken } from "@/lib/token";
 
 export default function LoginForm() {
   const [civilId, setCivilId] = useState("");
@@ -18,6 +19,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await deleteToken();
     setIsLoading(true);
     setError("");
 
