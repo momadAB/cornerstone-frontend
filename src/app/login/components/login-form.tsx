@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { login } from "@/app/api/actions/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaIdCard, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
+  const [civilId, setCivilId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,36 +21,36 @@ export default function LoginForm() {
     setIsLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      setError("Invalid email or password");
-      setIsLoading(false);
-    } else {
+    try {
+      const result = await login({ civilId, password });
+      console.log(result);
       router.push("/dashboard");
+    } catch (error: any) {
+      setError(error.message || "Invalid Civil ID or password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-gold-400">
-          Email
+        <Label htmlFor="civilId" className="text-gold-400">
+          Civil ID
         </Label>
         <div className="relative">
-          <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-400" />
+          <FaIdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-400" />
           <input
-            id="email"
-            name="email"
-            type="email"
+            id="civilId"
+            name="civilId"
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={civilId}
+            onChange={(e) => setCivilId(e.target.value)}
             className="w-full pl-10 px-3 py-2 bg-black/50 border border-gold-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-gold-400 text-white"
+            pattern="\d{12}"
+            maxLength={12}
+            placeholder="Enter your 12-digit Civil ID"
           />
         </div>
       </div>

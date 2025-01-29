@@ -1,0 +1,73 @@
+/* ZegoDashboard.css */
+
+/* Overall container with a subtle black gradient */
+.zegoDashboardContainer {
+  background: linear-gradient(160deg, #000 20%, #1a1a1a 100%);
+  color: #ffd700; /* Gold text */
+  font-family: Arial, sans-serif;
+  padding: 40px 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Centering the content and setting max-width for nicer layouts on large screens */
+.dashboardInnerWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Main header styling */
+.zegoDashboardHeader {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+/* Container for videos */
+.videoContainer {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Each video section (local & remote) */
+.videoSection {
+  flex: 1 1 400px; /* Adjusts sizing/responsiveness */
+  text-align: center;
+  background-color: #111; /* Slightly lighter black behind videos */
+  padding: 20px;
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+/* Subheader for each section */
+.subHeader {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #ffd700;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+/* Video elements */
+.videoElement {
+  width: 100%;
+  max-height: 400px; /* Adjust as needed */
+  background-color: #000;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  outline: none;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.videoElement:hover {
+  /* Slight "glow" effect on hover */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
