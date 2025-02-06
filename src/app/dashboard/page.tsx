@@ -1,5 +1,5 @@
 import React from "react";
-import Chat from "../../components/notifications";
+import Chat from "../../components/notifications/ChatApp";
 
 const page = () => {
   return (
