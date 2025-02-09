@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BellRing, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import NotificationList from "./NotificationList";
+import Toast from "./Toast";
 
 const NotificationSystem = ({ messages }) => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -23,6 +25,10 @@ const NotificationSystem = ({ messages }) => {
       return () => clearTimeout(timer);
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!showDropdown) handleClear();
+  }, [showDropdown]);
 
   const handleClear = () => {
     setUnreadCount(0);
@@ -59,55 +65,19 @@ const NotificationSystem = ({ messages }) => {
                 </button>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {messages.length > 0 ? (
-                  messages
-                    .slice()
-                    .reverse()
-                    .map((msg, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border-b hover:bg-gray-50"
-                      >
-                        <div className="font-medium">
-                          New message from {msg.senderName}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {msg.message}
-                        </div>
-                      </div>
-                    ))
-                ) : (
-                  <div className="p-3 text-center text-gray-500">
-                    No notifications
-                  </div>
-                )}
+                <NotificationList messages={messages} />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Toast Notification */}
-      {showToast && latestMessage && (
-        <div className="fixed top-16 right-4 z-50 max-w-sm animate-in slide-in-from-top-2">
-          <Alert className="bg-white border-blue-200 shadow-lg">
-            <BellRing className="h-4 w-4 text-blue-500" />
-            <AlertTitle className="flex items-center gap-2">
-              New Message
-            </AlertTitle>
-            <AlertDescription className="mt-2">
-              <strong>{latestMessage.senderName}:</strong>{" "}
-              {latestMessage.message}
-            </AlertDescription>
-            <button
-              onClick={() => setShowToast(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </Alert>
-        </div>
-      )}
+      {/* Toast Notification for chat message*/}
+      <Toast
+        message={latestMessage}
+        showToast={showToast}
+        setShowToast={setShowToast}
+      />
     </>
   );
 };

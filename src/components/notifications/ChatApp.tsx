@@ -85,10 +85,11 @@ export default function ChatApp() {
     if (stompClient && messageInput.trim() && isInitialized) {
       const chatMessage = {
         senderName: username,
-        recipientName: username,
+        recipientName: username == "ab" ? "engribrahimadnan" : "ab",
         message: messageInput,
         senderRole: userRole,
         type: NotificationType.NEW_MESSAGE,
+        businessName: "Test Business",
       };
       stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
       setMessageInput("");
