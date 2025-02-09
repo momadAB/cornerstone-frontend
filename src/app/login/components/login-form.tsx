@@ -87,7 +87,7 @@ export default function LoginForm() {
       </Button>
       {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
       <p className="text-center text-sm text-white/80 mt-4">
-        Don't have an account?{" "}
+      .  Don&apos;t have an account?{" "}
         <Link href="/signup" className="text-gold-400 hover:underline">
           Sign up
         </Link>
