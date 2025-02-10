@@ -114,7 +114,6 @@ export default function CreateLoanResponse() {
     repaymentPlan: requestedRepaymentPlan,
     status: loanStatus,
     statusDate,
-    selectedBanks,
     business,
   } = entity;
 
@@ -238,33 +237,7 @@ export default function CreateLoanResponse() {
             <span className="font-medium text-gray-800">Mobile:</span>{" "}
             {business.businessOwnerUser.mobileNumber}
           </p>
-          <p className="text-gray-600">
-            <span className="font-medium text-gray-800">Bank:</span>{" "}
-            {business.businessOwnerUser.bank}
-          </p>
         </div>
-      </section>
-
-      {/* --- Selected Banks --- */}
-      <section
-        aria-labelledby="selected-banks"
-        className="mb-6 rounded-md border border-gray-200 bg-white p-4 shadow-sm"
-      >
-        <h2
-          id="selected-banks"
-          className="mb-2 text-xl font-semibold text-gray-700"
-        >
-          Selected Banks
-        </h2>
-        {selectedBanks && selectedBanks.length > 0 ? (
-          <ul className="list-inside list-disc text-gray-600">
-            {selectedBanks.map((bank) => (
-              <li key={bank}>{bank}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No banks selected.</p>
-        )}
       </section>
 
       {/* --- Financial Statement Highlights --- */}

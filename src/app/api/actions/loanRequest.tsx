@@ -143,3 +143,90 @@ export async function fetchLoanRequest(
     );
   }
 }
+
+/**
+ * Approve a Loan Request.
+ * @param loanRequestId - The ID of the loan request to approve.
+ */
+export async function approveLoanRequest(loanRequestId: string): Promise<void> {
+  try {
+    const body = {
+      loanRequestId,
+      responseStatus: "APPROVED",
+    };
+    await axiosInstance.post(`${baseUrl}/loan/response`, body);
+    console.log("Loan request approved successfully.");
+  } catch (error: any) {
+    console.error("Error approving loan request:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to approve loan request"
+    );
+  }
+}
+
+/**
+ * Reject a Loan Request.
+ * @param loanRequestId - The ID of the loan request to reject.
+ * @param reason - The reason for rejecting the loan request.
+ */
+export async function rejectLoanRequest(
+  loanRequestId: string,
+  reason: string
+): Promise<void> {
+  try {
+    const body = {
+      loanRequestId,
+      responseStatus: "REJECTED",
+      reason,
+    };
+    await axiosInstance.post(`${baseUrl}/loan/response`, body);
+    console.log("Loan request rejected successfully.");
+  } catch (error: any) {
+    console.error("Error rejecting loan request:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to reject loan request"
+    );
+  }
+}
+
+/**
+ * Make a Counteroffer on a Loan Request.
+ * @param loanRequestId - The ID of the loan request.
+ * @param reason - The reason for the counteroffer.
+ * @param amount - The counteroffer amount.
+ * @param loanTerm - The proposed loan term.
+ * @param repaymentPlan - The proposed repayment plan.
+ */
+export async function makeCounterOffer(
+  loanRequestId: string,
+  reason: string,
+  amount: string,
+  loanTerm: "SIX_MONTHS" | "ONE_YEAR" | "TWO_YEARS" | "FIVE_YEARS",
+  repaymentPlan:
+    | "EQUAL_INSTALLMENTS"
+    | "BALLOON_PAYMENT"
+    | "STEP_UP"
+    | "STEP_DOWN"
+    | "LUMP_SUM"
+    | "GRACE_PERIOD"
+    | "REVENUE_BASED"
+    | "LEASE_TO_OWN"
+): Promise<void> {
+  try {
+    const body = {
+      loanRequestId,
+      responseStatus: "COUNTER_OFFER",
+      reason,
+      amount,
+      loanTerm,
+      repaymentPlan,
+    };
+    await axiosInstance.post(`${baseUrl}/loan/response`, body);
+    console.log("Counteroffer made successfully.");
+  } catch (error: any) {
+    console.error("Error making counteroffer:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to make counteroffer"
+    );
+  }
+}

@@ -113,14 +113,14 @@ export default function ChatApp() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 text-black">
       <NotificationSystem
         messages={messages}
         onDismiss={() => {
           // Optional: Handle dismissal, e.g., mark messages as read
         }}
       />
-      <h1 className="text-2xl font-bold">WebSocket Chat</h1>
+      <h1 className="text-2xl font-bold text-white">WebSocket Chat</h1>
       <div className="border p-4 mt-4 h-64 overflow-auto bg-gray-100">
         {messages.map((msg, index) => (
           <p key={index}>
