@@ -168,7 +168,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                       {record.businessOwner || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      ${record.amount?.toLocaleString() || "N/A"}
+                      {record.amount?.toLocaleString() || "N/A"} KD
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.paymentPeriod || "N/A"}
