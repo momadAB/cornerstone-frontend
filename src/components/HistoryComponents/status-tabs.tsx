@@ -1,5 +1,6 @@
 "use client";
 
+// StatusTabs.tsx
 interface StatusTabsProps {
   value: string;
   onValueChange: (value: string) => void;
@@ -19,9 +20,9 @@ export function StatusTabs({ value, onValueChange }: StatusTabsProps) {
         All
       </button>
       <button
-        onClick={() => onValueChange("PENDING")}
+        onClick={() => onValueChange("null")}
         className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
-          value === "PENDING"
+          value === "null"
             ? "bg-[#FFD700] text-black shadow-md"
             : "text-white/60 hover:text-white hover:bg-white/10"
         }`}
@@ -47,16 +48,6 @@ export function StatusTabs({ value, onValueChange }: StatusTabsProps) {
         }`}
       >
         Rejected
-      </button>
-      <button
-        onClick={() => onValueChange("NEW_RESPONSE")}
-        className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
-          value === "NEW_RESPONSE"
-            ? "bg-[#FFD700] text-black shadow-md"
-            : "text-white/60 hover:text-white hover:bg-white/10"
-        }`}
-      >
-        New response
       </button>
     </div>
   );

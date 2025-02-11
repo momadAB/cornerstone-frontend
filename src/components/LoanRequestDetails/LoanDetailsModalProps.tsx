@@ -146,10 +146,10 @@ export function LoanDetailsModal({
                     PENDING: "text-yellow-400",
                     APPROVED: "text-green-400",
                     REJECTED: "text-red-400",
-                  }[loanDetails.status] || "text-white"
+                  }[loanDetails.loanResponseStatus] || "text-white"
                 }`}
               >
-                {loanDetails.status}
+                {loanDetails.loanResponseStatus}
               </span>
             </DialogTitle>
           </DialogHeader>
