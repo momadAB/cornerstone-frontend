@@ -5,6 +5,15 @@ import { redirect } from "next/navigation";
 // Define a minimal interface for the response of sending a message
 interface SendMessageResponse {}
 
+interface BusinessDTO {
+  businessName: string;
+  chatId: number;
+  profilePicture: string | null;
+  lastMessage: string;
+}
+
+type BusinessesDTO = BusinessDTO[];
+
 // Define a minimal interface for the overall Chat DTO
 interface ChatDTO {
   id: number;
@@ -66,6 +75,18 @@ export async function getChatMessages(chatId: number): Promise<ChatDTO> {
     console.error("Error fetching chat messages:", error);
     throw new Error(
       error.response?.data?.message || "Failed to fetch chat messages"
+    );
+  }
+}
+
+export async function getPossibleBusinessesToChatWith(): Promise<BusinessesDTO> {
+  try {
+    const response = await axiosInstance.get(`/chat/businesses`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching chat messages:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch businesses"
     );
   }
 }

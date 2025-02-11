@@ -70,6 +70,7 @@ export function LoanDetailsModal({
 }: LoanDetailsModalProps) {
   const [loanDetails, setLoanDetails] = useState(null);
   const [status, setStatus] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -82,6 +83,7 @@ export function LoanDetailsModal({
         const response = await fetchLoanRequest(loanId);
         console.log("RESPONSE: ", response);
         setStatus(response.responseStatus);
+        setRejectionReason(response.rejectionReason);
         setLoanDetails(response.entity);
       } catch (err) {
         setError("Failed to fetch loan details");
@@ -179,6 +181,14 @@ export function LoanDetailsModal({
             <Card className="bg-[#142144] border-[#2D3A5C]">
               <CardContent className="p-4 space-y-4">
                 <div>
+                  {rejectionReason ? (
+                    <div className="mb-2">
+                      <InfoRow
+                        label="Rejection reason"
+                        value={rejectionReason}
+                      />
+                    </div>
+                  ) : null}
                   <h3 className="text-sm font-medium mb-2">Loan Details</h3>
                   <InfoRow label="Title" value={loanDetails.loanTitle} />
                   <InfoRow

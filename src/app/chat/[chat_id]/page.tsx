@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { getToken } from "@/lib/token";
 import { sendMessageToChat, getChatMessages } from "@/app/api/actions/chat";
-import { useParams } from "next/navigation";
+
+interface ChatPageProps {
+  chatId: number;
+}
 
 interface User {
   id: number;
@@ -33,18 +35,12 @@ interface ChatData {
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
 
-export default function ChatPage() {
-  const params = useParams();
-  const chatId = parseInt(params.chat_id, 10);
-
+export default function ChatPage({ chatId }: ChatPageProps) {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch chat data whenever chatId changes
   useEffect(() => {
-    if (!chatId) return; // Guard in case chatId is undefined or NaN
-
     async function loadChat() {
       try {
         const data = await getChatMessages(chatId);
@@ -54,7 +50,9 @@ export default function ChatPage() {
       }
     }
 
-    loadChat();
+    if (chatId) {
+      loadChat();
+    }
   }, [chatId]);
 
   useEffect(() => {
@@ -65,7 +63,7 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !chatData) return;
 
@@ -74,21 +72,30 @@ export default function ChatPage() {
       message: newMessage,
       sentAt: new Date().toISOString(),
       isYou: true,
-      senderFirstName: chatData.businessOwner.firstName,
+      senderFirstName: chatData.banker.firstName,
     };
 
+    // Optimistically update UI
     setChatData((prevData) => ({
       ...prevData!,
       messages: [...prevData!.messages, newMessageObj],
     }));
+
+    try {
+      await sendMessageToChat(chatId, newMessage);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // You might want to show an error message to the user here
+    }
+
     setNewMessage("");
   };
 
   if (!chatData) return <div className="text-white">Loading...</div>;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 px-72">
+    <div className="flex flex-col h-[90vh] bg-gray-900">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {chatData.messages.map((message) => (
           <div
             key={message.id}
@@ -98,7 +105,7 @@ export default function ChatPage() {
           >
             <div className="flex-shrink-0">
               <Image
-                src={DEFAULT_AVATAR || "/placeholder.svg"}
+                src={DEFAULT_AVATAR}
                 alt={`${message.senderFirstName}'s avatar`}
                 width={40}
                 height={40}
@@ -123,7 +130,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="p-4 bg-black">
-        <div className="flex space-x-2 px-72">
+        <div className="flex space-x-2">
           <input
             type="text"
             value={newMessage}

@@ -211,7 +211,7 @@ const LoanActions = ({ loanDetails, onApprove, onReject, onCounterOffer }) => {
           </div>
           <DialogFooter>
             <Button
-              variant="outline"
+              className=" hover:bg-red-700 border-red-500 hover:border-transparent bg-transparent border-2"
               onClick={() => setIsCounterOfferOpen(false)}
             >
               Cancel

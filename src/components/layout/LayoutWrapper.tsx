@@ -24,7 +24,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen">
         <SideBar />
         <Upbar />
-        <main className="pl-64 pt-16">
+        <main className="pl-64 pt-16 w-full">
           <div className="absolute inset-0 nav-pattern opacity-[0.02]" />
           <div className="relative px-1">{children}</div>
         </main>
