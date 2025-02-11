@@ -126,10 +126,11 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   ];
 
   const statusColors: Record<string, string> = {
-    PENDING: "bg-yellow-500 text-black",
-    APPROVED: "bg-green-500 text-white",
-    REJECTED: "bg-red-500 text-white",
-    NEW_RESPONSE: "bg-yellow-500 text-black",
+    PENDING: "bg-yellow-300 text-black",
+    APPROVED: "bg-green-400 text-black",
+    REJECTED: "bg-red-300 text-black",
+    NEW_RESPONSE: "bg-yellow-300 text-black",
+    RESCINDED: "bg-yellow-300 text-black",
   };
 
   return (
