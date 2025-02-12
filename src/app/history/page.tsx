@@ -11,7 +11,7 @@ export default function HistoryPage() {
   const { searchQuery } = useSearch(); // ✅ Get searchQuery from context
 
   return (
-    <div className="min-h-screen p-5 px-8">
+    <div className="h-[calc(100%-1.25rem)] p-5 px-8">
       <div className="max-w-[1400px] mx-auto space-y-6">
         {/* Status Tabs */}
         <StatusTabs value={status} onValueChange={setStatus} />

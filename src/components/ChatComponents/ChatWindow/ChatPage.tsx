@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { LoanRequestsModal } from "./LoanRequestsModal";
 import { getToken, getUser } from "@/lib/token";
 import SockJS from "sockjs-client";
 import { over } from "stompjs";
+import { WEBSOCKET_BASEURL } from "@/lib/utils";
 
 let stompClient = null;
 
@@ -60,13 +61,17 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const [processedMessageIds] = useState(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    console.log("always chat", chatData);
+  }, [chatData]);
+
   const initializeWebSocket = async () => {
     try {
       const token = await getToken();
       const user = await getUser();
       setCurrentUser(user);
 
-      const socket = new SockJS(`http://localhost:8080/ws?token=${token}`);
+      const socket = new SockJS(`${WEBSOCKET_BASEURL}?token=${token}`);
       stompClient = over(socket);
       stompClient.debug = null;
 
@@ -168,7 +173,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         message: data.message,
         sentAt: new Date().toISOString(),
         isYou: data.senderName === currentUser?.sub,
-        senderFirstName: data.senderName,
+        senderFirstName: data.senderFirstName, // Use the received first name
       };
 
       console.log("Created message object:", newMessageObj);
@@ -238,12 +243,16 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     e.preventDefault();
     if (!newMessage.trim() || !chatData || !isWebSocketConnected) return;
 
+    console.log("chatdata: ", chatData);
+
     const newMessageObj: Message = {
       id: Date.now(),
       message: newMessage,
       sentAt: new Date().toISOString(),
       isYou: true,
-      senderFirstName: chatData.banker.firstName,
+      senderFirstName: currentUser?.roles.includes("BANKER")
+        ? chatData.banker.firstName
+        : chatData.businessOwner.firstName, // Add this line
     };
 
     // Optimistically update UI
@@ -256,6 +265,8 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       // Send message through REST API
       await sendMessageToChat(chatId, newMessage);
 
+      console.log(currentUser);
+
       // Send message through WebSocket
       const chatMessage = {
         senderName: currentUser?.sub,
@@ -264,6 +275,9 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         senderRole: currentUser?.roles,
         type: "NEW_MESSAGE",
         businessName: chatData.businessOwner.business,
+        senderFirstName: currentUser?.roles.includes("BANKER")
+          ? chatData.banker.firstName
+          : chatData.businessOwner.firstName, // Add this line
       };
 
       console.log("Sending WebSocket message:", chatMessage);

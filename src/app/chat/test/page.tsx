@@ -9,6 +9,7 @@ import { sendMessageToChat, getChatMessages } from "@/app/api/actions/chat";
 import { getToken, getUser } from "@/lib/token";
 import SockJS from "sockjs-client";
 import { over } from "stompjs";
+import { WEBSOCKET_BASEURL } from "@/lib/utils";
 
 let stompClient = null;
 
@@ -58,7 +59,7 @@ export default function BusinessChatPage({}: BusinessChatPageProps) {
       const user = await getUser();
       setCurrentUser(user);
 
-      const socket = new SockJS(`http://localhost:8080/ws?token=${token}`);
+      const socket = new SockJS(`${WEBSOCKET_BASEURL}?token=${token}`);
       stompClient = over(socket);
       stompClient.debug = null; // Disable debug messages
 
@@ -153,7 +154,7 @@ export default function BusinessChatPage({}: BusinessChatPageProps) {
         message: data.message,
         sentAt: new Date().toISOString(),
         isYou: data.senderName === currentUser?.sub,
-        senderFirstName: data.senderName,
+        senderFirstName: data.senderFirstName, // Use the received first name
       };
 
       console.log("Created message object:", newMessageObj);
@@ -237,6 +238,9 @@ export default function BusinessChatPage({}: BusinessChatPageProps) {
         senderRole: currentUser?.roles,
         type: "NEW_MESSAGE",
         businessName: chatData.businessOwner.business,
+        senderFirstName: currentUser?.roles.includes("BANKER")
+          ? chatData.banker.firstName
+          : chatData.businessOwner.firstName, // Add this line
       };
 
       console.log("Sending WebSocket message:", chatMessage);
