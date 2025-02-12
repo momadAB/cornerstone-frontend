@@ -281,18 +281,8 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const capitalize = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
-
   return (
     <div className="flex flex-col h-[calc(100%-1.25rem)] bg-gray-900 border-[#7B7B7B] border-l-2 border-b-2 border-t-2 rounded-tl-lg mt-8 z-30">
-      {/* WebSocket Status Indicator */}
-      <div
-        className={`absolute top-2 right-2 px-2 py-1 rounded text-sm ${
-          isWebSocketConnected ? "bg-green-500" : "bg-red-500"
-        }`}
-      >
-        {isWebSocketConnected ? "Connected" : "Disconnected"}
-      </div>
-
       <div className="flex items-center justify-between px-6 py-4 bg-[#0F1624] border-b border-gray-700 rounded-tl-xl">
         <div className="flex items-center space-x-4">
           <Image
@@ -311,7 +301,15 @@ export default function ChatPage({ chatId }: ChatPageProps) {
             </p>
           </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-4">
+          {/* WebSocket Status Indicator */}
+          <div
+            className={`px-2 py-1 rounded text-sm ${
+              isWebSocketConnected ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {isWebSocketConnected ? "Connected" : "Disconnected"}
+          </div>
           <Button
             variant="outline"
             className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-yellow-400"
