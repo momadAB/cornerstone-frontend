@@ -1,16 +1,11 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import {
-  sendMessageToChat,
-  getChatMessages,
-  getPendingBusinessLoanRequests,
-  LoanRequest,
-} from "@/app/api/actions/chat";
-import { LoanRequestsModal } from "./LoanRequestsModal";
+import { sendMessageToChat, getChatMessages } from "@/app/api/actions/chat";
 import { getToken, getUser } from "@/lib/token";
 import SockJS from "sockjs-client";
 import { over } from "stompjs";
@@ -20,7 +15,7 @@ let stompClient = null;
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
 
-interface ChatPageProps {
+interface BusinessChatPageProps {
   chatId: number;
 }
 
@@ -31,7 +26,6 @@ interface User {
   isYou: boolean;
   business: string;
   profilePicture: string;
-  username: string;
 }
 
 interface Message {
@@ -49,16 +43,14 @@ interface ChatData {
   messages: Message[];
 }
 
-export default function ChatPage({ chatId }: ChatPageProps) {
+export default function BusinessChatPage({}: BusinessChatPageProps) {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
-  const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const [processedMessageIds] = useState(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const chatId = 1;
 
   const initializeWebSocket = async () => {
     try {
@@ -68,8 +60,9 @@ export default function ChatPage({ chatId }: ChatPageProps) {
 
       const socket = new SockJS(`http://localhost:8080/ws?token=${token}`);
       stompClient = over(socket);
-      stompClient.debug = null;
+      stompClient.debug = null; // Disable debug messages
 
+      // Using a more robust connection approach
       if (stompClient.connected) {
         stompClient.disconnect();
       }
@@ -79,20 +72,17 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           {},
           (frame) => {
             console.log("Connected to WebSocket");
+            // Only subscribe after we're sure we're connected
             setTimeout(() => {
               try {
-                const subscription = stompClient.subscribe(
-                  "/user/topic/queue",
-                  onMessageReceived
-                );
-                setSubscriptionId(subscription.id);
+                stompClient.subscribe("/user/topic/queue", onMessageReceived);
                 setIsWebSocketConnected(true);
                 resolve(true);
               } catch (err) {
                 console.error("Subscription error:", err);
                 reject(err);
               }
-            }, 1000);
+            }, 1000); // Give it a small delay to ensure connection is ready
           },
           (error) => {
             console.error("WebSocket connection error:", error);
@@ -106,7 +96,6 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     }
   };
 
-  // Initialize WebSocket connection
   useEffect(() => {
     let mounted = true;
 
@@ -117,9 +106,12 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         }
       } catch (error) {
         console.error("Failed to initialize WebSocket:", error);
-        if (mounted) {
-          setTimeout(connect, 3000);
-        }
+        // Retry connection after a delay
+        setTimeout(() => {
+          if (mounted) {
+            connect();
+          }
+        }, 3000);
       }
     };
 
@@ -127,41 +119,34 @@ export default function ChatPage({ chatId }: ChatPageProps) {
 
     return () => {
       mounted = false;
-      if (subscriptionId && stompClient) {
-        stompClient.unsubscribe(subscriptionId);
-      }
       if (stompClient && stompClient.connected) {
         stompClient.disconnect();
       }
     };
   }, []);
 
-  // Handle incoming WebSocket messages
+  // Add message deduplication
+  const [processedMessageIds] = useState(new Set());
+
   const onMessageReceived = (payload) => {
     try {
       console.log("WebSocket message received:", payload);
       const data = JSON.parse(payload.body);
       console.log("Parsed WebSocket data:", data);
 
-      // Create a more stable message ID using a combination of properties
-      const messageKey = JSON.stringify({
-        sender: data.senderName,
-        recipient: data.recipientName,
-        message: data.message,
-        business: data.businessName,
-      });
-
-      console.log("Generated message key:", messageKey);
+      // Generate a unique message ID based on content and timestamp
+      const messageId = `${data.senderName}-${data.message}-${
+        data.timestamp || Date.now()
+      }`;
 
       // Skip if we've already processed this message
-      if (processedMessageIds.has(messageKey)) {
-        console.log("Duplicate message detected, skipping. Key:", messageKey);
+      if (processedMessageIds.has(messageId)) {
+        console.log("Duplicate message detected, skipping:", messageId);
         return;
       }
 
       // Add to processed messages
-      processedMessageIds.add(messageKey);
-      console.log("Added message key to processed set:", messageKey);
+      processedMessageIds.add(messageId);
 
       const newMessageObj: Message = {
         id: Date.now(),
@@ -213,25 +198,13 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     }
   }, [chatId]);
 
+  // Auto-scroll to bottom when messages update
   useEffect(() => {
     scrollToBottom();
   }, [chatData?.messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const fetchLoanRequests = async () => {
-    if (chatData?.businessOwner?.id) {
-      try {
-        const data = await getPendingBusinessLoanRequests(
-          chatData.businessOwner.id
-        );
-        setLoanRequests(data);
-      } catch (error) {
-        console.error("Failed to fetch loan requests:", error);
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,7 +216,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       message: newMessage,
       sentAt: new Date().toISOString(),
       isYou: true,
-      senderFirstName: chatData.banker.firstName,
+      senderFirstName: chatData.businessOwner.firstName,
     };
 
     // Optimistically update UI
@@ -259,7 +232,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       // Send message through WebSocket
       const chatMessage = {
         senderName: currentUser?.sub,
-        recipientName: chatData.businessOwner.username,
+        recipientName: chatData.banker.username,
         message: newMessage,
         senderRole: currentUser?.roles,
         type: "NEW_MESSAGE",
@@ -292,36 +265,23 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       >
         {isWebSocketConnected ? "Connected" : "Disconnected"}
       </div>
-
       <div className="flex items-center justify-between px-6 py-4 bg-[#0F1624] border-b border-gray-700 rounded-tl-xl">
         <div className="flex items-center space-x-4">
           <Image
             src={DEFAULT_AVATAR}
-            alt={`${chatData.businessOwner.firstName}'s avatar`}
+            alt={`${chatData.banker.firstName}'s avatar`}
             width={48}
             height={48}
             className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
           />
           <div>
             <h2 className="text-xl font-semibold text-white">
-              {chatData.businessOwner.business}
+              {chatData.banker.bank}
             </h2>
-            <p className="text-sm text-gray-400">
-              {chatData.businessOwner.firstName}
-            </p>
+            <p className="text-sm text-gray-400">{chatData.banker.firstName}</p>
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-yellow-400"
-            onClick={() => {
-              fetchLoanRequests();
-              setIsLoanModalOpen(true);
-            }}
-          >
-            View Loan Requests
-          </Button>
           <Button
             variant="outline"
             className="bg-gray-700 hover:bg-gray-600 border-gray-600 p-2"
@@ -331,12 +291,6 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           </Button>
         </div>
       </div>
-
-      <LoanRequestsModal
-        isOpen={isLoanModalOpen}
-        onClose={() => setIsLoanModalOpen(false)}
-        requests={loanRequests}
-      />
 
       <div className="flex-1 min-w-0 bg-[url('/ChatBackground.png')] bg-repeat pt-5 px-5 overflow-y-auto">
         {chatData.messages.map((message) => (

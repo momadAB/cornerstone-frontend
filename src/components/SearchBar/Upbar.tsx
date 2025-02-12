@@ -43,7 +43,7 @@ export default function Upbar() {
   const IconComponent = ICONS[icon]; // Dynamically select the icon
 
   return (
-    <header className="flex justify-between items-center px-6 py-4  bg-[#0B1638] border-b border-[#2D3A5C] shadow-md fixed w-screen z-10 pl-72 ">
+    <header className="flex justify-between items-center px-6 py-4  bg-[#0B1638] shadow-sm fixed w-screen z-10 pl-72 ">
       {/* 🔹 Page Title with Icon */}
       <h1 className="text-xl font-semibold flex items-center gap-2 text-white">
         <IconComponent className="w-5 h-5 text-white/70" /> {title}
@@ -51,7 +51,7 @@ export default function Upbar() {
 
       {/* 🔍 SearchBar & 🔔 Notifications */}
       <div className="flex items-center gap-4">
-        <SearchBar />
+        {/* <SearchBar /> */}
 
         {/* 🔔 Notification Button with Consistent Icon Handling */}
         <button

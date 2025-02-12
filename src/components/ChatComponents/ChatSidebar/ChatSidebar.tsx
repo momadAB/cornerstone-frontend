@@ -41,17 +41,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   );
 
   return (
-    <div className="chat-sidebar w-60 bg-darkBlueLight p-4 h-[90vh]">
+    <div className="chat-sidebar w-60 bg-transparent p-4 h-full mt-5">
       <div className="mb-4 relative">
         <input
           type="text"
           placeholder="Search chats..."
-          className="w-full p-2 pl-10 rounded-lg bg-gray-800 text-white outline-none"
+          className="w-full p-2 pl-10 rounded-lg bg-[#232D4C] text-white outline-none border-white border-[1px]"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <Search
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400"
           size={18}
         />
       </div>
@@ -67,8 +67,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               key={business.chatId}
               className={`p-3 rounded-lg cursor-pointer transition-colors ${
                 selectedChatId === business.chatId
-                  ? "bg-yellow-400 text-black"
-                  : "bg-gray-800 text-white hover:bg-gray-700"
+                  ? "bg-[#182445] text-white"
+                  : "bg-transparent text-white hover:bg-[#232D4C]"
               }`}
               onClick={() => onChatSelect(business.chatId)}
             >

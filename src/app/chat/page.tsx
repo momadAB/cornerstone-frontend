@@ -4,8 +4,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div className="chat-page flex h-[90vh] bg-darkBlue">
-      {/* Sidebar */}
+    <div className="chat-page flex h-[calc(100vh-64px)] bg-darkBlue">
       <div className="bg-darkBlueLight h-full w-full">
         <ChatLayout />
       </div>
