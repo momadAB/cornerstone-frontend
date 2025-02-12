@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
- import {
+import {
   Bell,
   Clock,
   History,
@@ -51,7 +51,12 @@ export default function Upbar() {
 
       {/* 🔍 SearchBar & 🔔 Notifications */}
       <div className="flex items-center gap-4">
-        <SearchBar />
+        <SearchBar
+          value={""}
+          onChange={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
 
         {/* 🔔 Notification Button with Consistent Icon Handling */}
         <button

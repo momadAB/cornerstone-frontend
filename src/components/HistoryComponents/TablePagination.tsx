@@ -3,10 +3,11 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 
+// ✅ Explicitly define types for the props
 interface TablePaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  currentPage: number; // Ensures currentPage is always a number
+  totalPages: number; // Ensures totalPages is always a number
+  onPageChange: (page: number) => void; // Ensures onPageChange receives a number
 }
 
 export function TablePagination({
@@ -16,10 +17,10 @@ export function TablePagination({
 }: TablePaginationProps) {
   // ✅ Optimized Pagination Logic Using useMemo
   const paginationNumbers = useMemo(() => {
-    if (totalPages <= 1) return []; // No need for pagination if only one page
+    if (totalPages <= 1) return []; // No pagination needed if only one page
 
     const pages: (number | string)[] = [];
-    const maxVisiblePages = 5; // Maximum number of pages before adding ellipsis
+    const maxVisiblePages = 5; // Max number of pages before ellipsis
 
     if (totalPages <= maxVisiblePages) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -43,7 +44,7 @@ export function TablePagination({
       }
     }
     return pages;
-  }, [currentPage, totalPages]); // ✅ useMemo is called unconditionally
+  }, [currentPage, totalPages]); // ✅ Ensure dependencies are defined
 
   if (paginationNumbers.length === 0) return null; // ✅ No rendering if there's only one page
 
@@ -70,7 +71,7 @@ export function TablePagination({
           <button
             key={
               typeof page === "number" ? `page-${page}` : `ellipsis-${index}`
-            } // ✅ Ensure unique keys
+            }
             onClick={() => typeof page === "number" && onPageChange(page)}
             disabled={page === "..."}
             aria-label={
@@ -106,3 +107,5 @@ export function TablePagination({
     </div>
   );
 }
+
+export default TablePagination; // ✅ Ensure it's exported correctly

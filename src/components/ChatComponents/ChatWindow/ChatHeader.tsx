@@ -11,7 +11,7 @@ interface ChatHeaderProps {
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   userName,
   userAvatar = "/default-avatar.png",
-  isOnline = false,
+  isOnline = true,
   onVideoCall,
 }) => {
   return (

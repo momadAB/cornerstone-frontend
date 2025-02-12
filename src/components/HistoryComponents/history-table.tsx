@@ -98,7 +98,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                     key={record.id}
                     className={`border-b border-[#2D3A5C] ${rowColor} hover:bg-[#1C2E55] transition-all`}
                   >
-                    <td className="py-3 px-1 text-sm text-white font-semibold text-center">
+                    <td className="py-3 px-5 text-sm text-white font-semibold text-center">
                       {record.businessName || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
