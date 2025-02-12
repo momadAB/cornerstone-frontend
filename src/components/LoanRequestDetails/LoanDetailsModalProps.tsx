@@ -166,6 +166,7 @@ export function LoanDetailsModal({
             onApprove={handleApprove}
             onReject={handleReject}
             onCounterOffer={handleCounterOffer}
+            loanResponseStatus={status}
           />
         </div>
 

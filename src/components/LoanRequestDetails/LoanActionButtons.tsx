@@ -23,7 +23,13 @@ import {
 } from "@/components/ui/select";
 import { MessageCircle, Check, X, RefreshCw } from "lucide-react";
 
-const LoanActions = ({ loanDetails, onApprove, onReject, onCounterOffer }) => {
+const LoanActions = ({
+  loanDetails,
+  onApprove,
+  onReject,
+  onCounterOffer,
+  loanResponseStatus,
+}) => {
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [isCounterOfferOpen, setIsCounterOfferOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -34,8 +40,8 @@ const LoanActions = ({ loanDetails, onApprove, onReject, onCounterOffer }) => {
     reason: "",
   });
 
-  console.log(loanDetails?.status);
-  if (loanDetails?.status !== "PENDING") {
+  console.log("statuses: ", loanDetails?.status, loanResponseStatus);
+  if (loanResponseStatus) {
     return <></>;
   }
 
