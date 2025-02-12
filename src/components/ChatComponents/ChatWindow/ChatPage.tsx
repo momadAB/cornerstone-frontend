@@ -2,9 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa";
+import { Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { sendMessageToChat, getChatMessages } from "@/app/api/actions/chat";
+import {
+  sendMessageToChat,
+  getChatMessages,
+  getPendingBusinessLoanRequests,
+  LoanRequest,
+} from "@/app/api/actions/chat";
+import { LoanRequestsModal } from "./LoanRequestsModal";
 
 interface ChatPageProps {
   chatId: number;
@@ -15,6 +22,8 @@ interface User {
   firstName: string;
   bank: string;
   isYou: boolean;
+  business: string;
+  profilePicture: string;
 }
 
 interface Message {
@@ -38,7 +47,24 @@ const DEFAULT_AVATAR =
 export default function ChatPage({ chatId }: ChatPageProps) {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Add this function to fetch loan requests
+  const fetchLoanRequests = async () => {
+    if (chatData?.businessOwner?.id) {
+      try {
+        const data = await getPendingBusinessLoanRequests(
+          chatData.businessOwner.id
+        );
+        console.log(data, chatData.businessOwner);
+        setLoanRequests(data);
+      } catch (error) {
+        console.error("Failed to fetch loan requests:", error);
+      }
+    }
+  };
 
   useEffect(() => {
     async function loadChat() {
@@ -95,6 +121,53 @@ export default function ChatPage({ chatId }: ChatPageProps) {
 
   return (
     <div className="flex flex-col h-[90vh] bg-gray-900">
+      <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700">
+        <div className="flex items-center space-x-4">
+          <Image
+            src={DEFAULT_AVATAR}
+            alt={`${chatData.businessOwner.firstName}'s avatar`}
+            width={48}
+            height={48}
+            className="rounded-full"
+          />
+          <div>
+            <h2 className="text-xl font-semibold text-white">
+              {chatData.businessOwner.business}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {chatData.businessOwner.firstName}
+            </p>
+          </div>
+        </div>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-yellow-400"
+            onClick={() => {
+              fetchLoanRequests();
+              setIsLoanModalOpen(true);
+            }}
+          >
+            View Loan Requests
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-gray-700 hover:bg-gray-600 border-gray-600 p-2"
+            onClick={() => console.log("Video call clicked")}
+          >
+            <Video className="text-yellow-400 w-28 h-28" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Add the modal component */}
+      <LoanRequestsModal
+        isOpen={isLoanModalOpen}
+        onClose={() => setIsLoanModalOpen(false)}
+        requests={loanRequests}
+      />
+
+      {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {chatData.messages.map((message) => (
           <div
@@ -129,6 +202,8 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         ))}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Message Input */}
       <form onSubmit={handleSubmit} className="p-4 bg-black">
         <div className="flex space-x-2">
           <input

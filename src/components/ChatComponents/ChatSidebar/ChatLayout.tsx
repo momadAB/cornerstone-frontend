@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ChatSidebar from "./ChatSidebar";
-import ChatPage from "@/app/chat/[chat_id]/page";
+import ChatPage from "@/components/ChatComponents/ChatWindow/ChatPage";
 
 const ChatLayout = () => {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
