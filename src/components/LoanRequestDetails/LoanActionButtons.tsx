@@ -22,9 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MessageCircle, Check, X, RefreshCw } from "lucide-react";
+import ChatPage from "../ChatComponents/ChatWindow/ChatPage";
+import { LoanDetailsModal } from "./LoanDetailsModalProps";
 
 const LoanActions = ({
   loanDetails,
+  chatId,
   onApprove,
   onReject,
   onCounterOffer,
@@ -33,6 +36,7 @@ const LoanActions = ({
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [isCounterOfferOpen, setIsCounterOfferOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [isNegotiateOpen, setIsNegotiateOpen] = useState(false);
   const [counterOffer, setCounterOffer] = useState({
     amount: loanDetails?.amount || "",
     loanTerm: loanDetails?.loanTerm || "ONE_YEAR",
@@ -89,6 +93,7 @@ const LoanActions = ({
       </Button>
 
       <Button
+        onClick={() => setIsNegotiateOpen(true)}
         variant="outline"
         className="hover:bg-gold-400 border-yellow-500 hover:border-transparent bg-transparent border-2 hover:text-black"
       >
@@ -228,6 +233,30 @@ const LoanActions = ({
               disabled={!counterOffer.reason.trim() || !counterOffer.amount}
             >
               Submit Counter Offer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Negotiate Dialog */}
+      <Dialog
+        open={isNegotiateOpen}
+        onOpenChange={setIsNegotiateOpen}
+        className="max-w-4xl"
+      >
+        <DialogContent className="bg-[#0B1638] border border-[#2D3A5C] text-white max-h-screen overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Negotiate Loan Terms</DialogTitle>
+          </DialogHeader>
+          <div className="h-[80vh]">
+            <ChatPage chatId={chatId} />
+          </div>
+          <DialogFooter>
+            <Button
+              className="hover:bg-red-700 border-red-500 hover:border-transparent bg-transparent border-2"
+              onClick={() => setIsNegotiateOpen(false)}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

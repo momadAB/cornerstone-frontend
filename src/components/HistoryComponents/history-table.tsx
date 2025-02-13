@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { TablePagination } from "@/components/HistoryComponents/TablePagination";
 import {
   fetchLoanHistory,
@@ -32,22 +32,55 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const recordsPerPage = 8;
 
+  // Use refs to store the polling interval and modal state
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isModalOpenRef = useRef(false);
+
   const handleRowClick = (loanId: number) => {
     setSelectedLoanId(loanId);
     setIsModalOpen(true);
   };
 
+  // Helper function to check if data has changed
+  const hasDataChanged = (
+    newData: HistoryRecord[],
+    oldData: HistoryRecord[]
+  ) => {
+    if (newData.length !== oldData.length) return true;
+
+    return newData.some((newRecord, index) => {
+      const oldRecord = oldData[index];
+      return (
+        newRecord.id !== oldRecord.id ||
+        newRecord.status !== oldRecord.status ||
+        newRecord.amount !== oldRecord.amount ||
+        newRecord.businessName !== oldRecord.businessName ||
+        newRecord.businessOwner !== oldRecord.businessOwner ||
+        newRecord.paymentPeriod !== oldRecord.paymentPeriod ||
+        newRecord.date !== oldRecord.date
+      );
+    });
+  };
+
+  // Separate effect for modal state tracking
+  useEffect(() => {
+    isModalOpenRef.current = isModalOpen;
+  }, [isModalOpen]);
+
+  // Effect for data fetching and polling
   useEffect(() => {
     const loadHistoryData = async () => {
+      // Don't fetch if modal is open
+      if (isModalOpenRef.current) return;
+
       try {
-        setIsLoading(true);
+        if (!isModalOpenRef.current) setIsLoading(true);
         const response: LoanHistoryResponse = await fetchLoanHistory(
           currentPage - 1,
-          status === "null" ? "PENDING" : status, // Convert "null" string to actual null
+          status === "null" ? "PENDING" : status,
           searchQuery,
           recordsPerPage
         );
-        console.log(response);
 
         if (response.status === "SUCCESS") {
           const transformedData = response.requests.map((item: any) => ({
@@ -62,19 +95,40 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                 ? "PENDING"
                 : item.loanResponseStatus,
           }));
-          console.log("transofmred:", transformedData);
-          setHistoryData(transformedData);
-          setTotalRecords(response.totalRecords);
+
+          // Only update if data has changed and modal is closed
+          if (
+            !isModalOpenRef.current &&
+            hasDataChanged(transformedData, historyData)
+          ) {
+            setHistoryData(transformedData);
+            setTotalRecords(response.totalRecords);
+          }
         }
       } catch (err) {
-        setError("Failed to fetch history data");
-        console.error(err);
+        if (!isModalOpenRef.current) {
+          setError("Failed to fetch history data");
+          console.error(err);
+        }
       } finally {
-        setIsLoading(false);
+        if (!isModalOpenRef.current) setIsLoading(false);
       }
     };
+
+    // Initial load
     loadHistoryData();
-  }, [currentPage, status, searchQuery]);
+
+    // Set up polling interval
+    pollingIntervalRef.current = setInterval(loadHistoryData, 4000);
+
+    // Cleanup function
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [currentPage, status, searchQuery, recordsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -100,7 +154,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
     return `${formattedDate}, ${formattedTime}`;
   };
 
-  if (isLoading) {
+  if (isLoading && !isModalOpen) {
     return (
       <div className="rounded-lg border border-[#2D3A5C] bg-[#0B1638] p-4 shadow-lg">
         <div className="text-center py-6 text-white/60">Loading...</div>
@@ -108,7 +162,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
     );
   }
 
-  if (error) {
+  if (error && !isModalOpen) {
     return (
       <div className="rounded-lg border border-[#2D3A5C] bg-[#0B1638] p-4 shadow-lg">
         <div className="text-center py-6 text-red-500">{error}</div>
@@ -184,7 +238,6 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                           "bg-gray-700 text-white"
                         }`}
                       >
-                        {console.log(record)}
                         {record.status || "Unknown"}
                       </span>
                     </td>

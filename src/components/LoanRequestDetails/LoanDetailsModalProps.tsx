@@ -73,6 +73,7 @@ export function LoanDetailsModal({
   const [rejectionReason, setRejectionReason] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [chatId, setChatId] = useState(null);
 
   useEffect(() => {
     const getLoanDetails = async () => {
@@ -84,6 +85,7 @@ export function LoanDetailsModal({
         console.log("RESPONSE: ", response);
         setStatus(response.responseStatus);
         setRejectionReason(response.rejectionReason);
+        setChatId(response.chatId);
         setLoanDetails(response.entity);
       } catch (err) {
         setError("Failed to fetch loan details");
@@ -163,6 +165,7 @@ export function LoanDetailsModal({
           </DialogHeader>
           <LoanActions
             loanDetails={loanDetails}
+            chatId={chatId}
             onApprove={handleApprove}
             onReject={handleReject}
             onCounterOffer={handleCounterOffer}
