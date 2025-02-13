@@ -23,11 +23,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <SearchProvider>
       <div className="flex min-h-screen">
         <SideBar />
-        <Upbar />
-        <main className="pl-64 pt-16">
-          <div className="absolute inset-0 nav-pattern opacity-[0.02]" />
-          <div className="relative px-1">{children}</div>
-        </main>
+        <div className="flex flex-col flex-1">
+          <Upbar />
+          <main className="flex-1 pl-64 pt-16">
+            <div className="absolute inset-0 nav-pattern opacity-[0.02]" />
+            <div className="relative h-full">{children}</div>
+          </main>
+        </div>
       </div>
     </SearchProvider>
   );

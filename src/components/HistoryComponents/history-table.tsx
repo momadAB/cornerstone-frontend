@@ -23,7 +23,6 @@ export interface HistoryRecord {
 }
 
 export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
-  // currentPage is 1-indexed for display but the API expects a 0-indexed page.
   const [currentPage, setCurrentPage] = useState(1);
   const [historyData, setHistoryData] = useState<HistoryRecord[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -42,15 +41,15 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
     const loadHistoryData = async () => {
       try {
         setIsLoading(true);
-        // Note: subtract 1 from currentPage to send a 0-indexed page value.
         const response: LoanHistoryResponse = await fetchLoanHistory(
           currentPage - 1,
-          status,
+          status === "null" ? "PENDING" : status, // Convert "null" string to actual null
           searchQuery,
           recordsPerPage
         );
+        console.log(response);
+
         if (response.status === "SUCCESS") {
-          // Optionally transform your API records as needed.
           const transformedData = response.requests.map((item: any) => ({
             id: item.id,
             businessName: item.businessName,
@@ -58,8 +57,12 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
             amount: item.amount,
             paymentPeriod: item.paymentPeriod,
             date: item.date,
-            status: item.status,
+            status:
+              item.loanResponseStatus === null
+                ? "PENDING"
+                : item.loanResponseStatus,
           }));
+          console.log("transofmred:", transformedData);
           setHistoryData(transformedData);
           setTotalRecords(response.totalRecords);
         }
@@ -70,16 +73,13 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
         setIsLoading(false);
       }
     };
-
     loadHistoryData();
   }, [currentPage, status, searchQuery]);
 
-  // When the filtering criteria change, reset back to page 1.
   useEffect(() => {
     setCurrentPage(1);
   }, [status, searchQuery]);
 
-  // Compute total pages based on the total number of records returned from the API.
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -125,6 +125,14 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
     { label: "Status", width: "15%" },
   ];
 
+  const statusColors: Record<string, string> = {
+    PENDING: "bg-yellow-300 text-black",
+    APPROVED: "bg-green-400 text-black",
+    REJECTED: "bg-red-300 text-black",
+    NEW_RESPONSE: "bg-yellow-300 text-black",
+    RESCINDED: "bg-yellow-300 text-black",
+  };
+
   return (
     <div className="rounded-lg border border-[#2D3A5C] bg-[#0B1638] p-4 shadow-lg">
       <div className="overflow-x-auto">
@@ -147,12 +155,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
               historyData.map((record, index) => {
                 const isEvenRow = index % 2 === 0;
                 const rowColor = isEvenRow ? "bg-[#0B1638]" : "bg-[#1A2C50]";
-                const statusColors: Record<string, string> = {
-                  PENDING: "bg-yellow-500 text-black",
-                  APPROVED: "bg-green-500 text-white",
-                  DECLINED: "bg-red-500 text-white",
-                  NEW_RESPONSE: "bg-yellow-500 text-black",
-                };
+
                 return (
                   <tr
                     key={record.id}
@@ -166,7 +169,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                       {record.businessOwner || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.amount || "N/A"}
+                      {record.amount?.toLocaleString() || "N/A"} KD
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.paymentPeriod || "N/A"}
@@ -181,6 +184,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                           "bg-gray-700 text-white"
                         }`}
                       >
+                        {console.log(record)}
                         {record.status || "Unknown"}
                       </span>
                     </td>
@@ -197,13 +201,11 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
           </tbody>
         </table>
       </div>
-
       <LoanDetailsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         loanId={selectedLoanId}
       />
-
       {totalPages > 1 && (
         <TablePagination
           currentPage={currentPage}

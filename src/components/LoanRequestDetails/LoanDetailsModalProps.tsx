@@ -69,6 +69,8 @@ export function LoanDetailsModal({
   loanId,
 }: LoanDetailsModalProps) {
   const [loanDetails, setLoanDetails] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -79,6 +81,9 @@ export function LoanDetailsModal({
         setIsLoading(true);
         setError(null);
         const response = await fetchLoanRequest(loanId);
+        console.log("RESPONSE: ", response);
+        setStatus(response.responseStatus);
+        setRejectionReason(response.rejectionReason);
         setLoanDetails(response.entity);
       } catch (err) {
         setError("Failed to fetch loan details");
@@ -142,14 +147,17 @@ export function LoanDetailsModal({
               <span>Loan Request #{loanId}</span>
               <span
                 className={`text-sm ${
-                  {
-                    PENDING: "text-yellow-400",
-                    APPROVED: "text-green-400",
-                    REJECTED: "text-red-400",
-                  }[loanDetails.status] || "text-white"
+                  status === null
+                    ? "text-yellow-400"
+                    : {
+                        PENDING: "text-yellow-400",
+                        APPROVED: "text-green-400",
+                        REJECTED: "text-red-400",
+                      }[status] || "text-white"
                 }`}
               >
-                {loanDetails.status}
+                {console.log(loanDetails)}
+                {status || "PENDING"}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -158,6 +166,7 @@ export function LoanDetailsModal({
             onApprove={handleApprove}
             onReject={handleReject}
             onCounterOffer={handleCounterOffer}
+            loanResponseStatus={status}
           />
         </div>
 
@@ -173,6 +182,14 @@ export function LoanDetailsModal({
             <Card className="bg-[#142144] border-[#2D3A5C]">
               <CardContent className="p-4 space-y-4">
                 <div>
+                  {rejectionReason ? (
+                    <div className="mb-2">
+                      <InfoRow
+                        label="Rejection reason"
+                        value={rejectionReason}
+                      />
+                    </div>
+                  ) : null}
                   <h3 className="text-sm font-medium mb-2">Loan Details</h3>
                   <InfoRow label="Title" value={loanDetails.loanTitle} />
                   <InfoRow

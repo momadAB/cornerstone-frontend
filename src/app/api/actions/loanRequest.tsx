@@ -8,6 +8,7 @@ import { baseUrl, axiosInstance } from "./config";
 export interface LoanRequestResponse {
   status: string;
   message: string;
+  responseStatus: string;
   entity: {
     id: number;
     business: {
