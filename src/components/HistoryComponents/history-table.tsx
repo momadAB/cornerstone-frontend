@@ -20,6 +20,9 @@ export interface HistoryRecord {
   paymentPeriod: string;
   date: string;
   status: string;
+  otherBanksHaveMadeCounterResponse: boolean;
+  loanRequestStatus: string;
+  loanResponseStatus: string;
 }
 
 export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
@@ -32,49 +35,60 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const recordsPerPage = 8;
 
-  // Use refs to store the polling interval and modal state
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isModalOpenRef = useRef(false);
+  const previousDataRef = useRef<HistoryRecord[]>([]);
 
   const handleRowClick = (loanId: number) => {
     setSelectedLoanId(loanId);
     setIsModalOpen(true);
   };
 
-  // Helper function to check if data has changed
   const hasDataChanged = (
     newData: HistoryRecord[],
     oldData: HistoryRecord[]
-  ) => {
-    if (newData.length !== oldData.length) return true;
+  ): boolean => {
+    const newIds = new Set(newData.map((record) => record.id));
+    const oldIds = new Set(oldData.map((record) => record.id));
 
-    return newData.some((newRecord, index) => {
-      const oldRecord = oldData[index];
-      return (
-        newRecord.id !== oldRecord.id ||
-        newRecord.status !== oldRecord.status ||
-        newRecord.amount !== oldRecord.amount ||
-        newRecord.businessName !== oldRecord.businessName ||
-        newRecord.businessOwner !== oldRecord.businessOwner ||
-        newRecord.paymentPeriod !== oldRecord.paymentPeriod ||
-        newRecord.date !== oldRecord.date
+    if (newIds.size !== oldIds.size) {
+      console.log(
+        `Different number of records detected: Old=${oldIds.size}, New=${newIds.size}`
       );
+      return true;
+    }
+
+    for (const id of newIds) {
+      if (!oldIds.has(id)) {
+        console.log(`New record detected with ID: ${id}`);
+        return true;
+      }
+    }
+
+    const statusChange = newData.some((newRecord) => {
+      const oldRecord = oldData.find((old) => old.id === newRecord.id);
+      if (oldRecord && oldRecord.status !== newRecord.status) {
+        console.log(`Status change detected for ID ${newRecord.id}:`, {
+          oldStatus: oldRecord.status,
+          newStatus: newRecord.status,
+        });
+        return true;
+      }
+      return false;
     });
+
+    return statusChange;
   };
 
-  // Separate effect for modal state tracking
   useEffect(() => {
     isModalOpenRef.current = isModalOpen;
   }, [isModalOpen]);
 
-  // Effect for data fetching and polling
   useEffect(() => {
     const loadHistoryData = async () => {
-      // Don't fetch if modal is open
       if (isModalOpenRef.current) return;
 
       try {
-        if (!isModalOpenRef.current) setIsLoading(true);
         const response: LoanHistoryResponse = await fetchLoanHistory(
           currentPage - 1,
           status === "null" ? "PENDING" : status,
@@ -82,27 +96,46 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
           recordsPerPage
         );
 
-        if (response.status === "SUCCESS") {
-          const transformedData = response.requests.map((item: any) => ({
-            id: item.id,
-            businessName: item.businessName,
-            businessOwner: item.businessOwner,
-            amount: item.amount,
-            paymentPeriod: item.paymentPeriod,
-            date: item.date,
-            status:
-              item.loanResponseStatus === null
-                ? "PENDING"
-                : item.loanResponseStatus,
-          }));
+        console.log("response: ", response);
 
-          // Only update if data has changed and modal is closed
+        if (response.status === "SUCCESS") {
+          const transformedData = response.requests.map((item: any) => {
+            // Determine the status based on loanRequestStatus and loanResponseStatus
+            let displayStatus = "PENDING";
+
+            if (
+              item.loanRequestStatus === "APPROVED" &&
+              item.loanResponseStatus !== "APPROVED"
+            ) {
+              displayStatus = "RESCINDED";
+            } else if (item.loanResponseStatus !== null) {
+              displayStatus = item.loanResponseStatus;
+            }
+
+            return {
+              id: item.id,
+              businessName: item.businessName,
+              businessOwner: item.businessOwner,
+              amount: item.amount,
+              paymentPeriod: item.paymentPeriod,
+              date: item.date,
+              status: displayStatus,
+              otherBanksHaveMadeCounterResponse:
+                item.otherBanksHaveMadeCounterResponse,
+              loanRequestStatus: item.loanRequestStatus,
+              loanResponseStatus: item.loanResponseStatus,
+            };
+          });
+
           if (
             !isModalOpenRef.current &&
-            hasDataChanged(transformedData, historyData)
+            hasDataChanged(transformedData, previousDataRef.current)
           ) {
+            console.log("Updating data");
+            if (!isModalOpenRef.current) setIsLoading(true);
             setHistoryData(transformedData);
             setTotalRecords(response.totalRecords);
+            previousDataRef.current = transformedData;
           }
         }
       } catch (err) {
@@ -115,13 +148,9 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
       }
     };
 
-    // Initial load
     loadHistoryData();
-
-    // Set up polling interval
     pollingIntervalRef.current = setInterval(loadHistoryData, 4000);
 
-    // Cleanup function
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
@@ -155,6 +184,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   };
 
   if (isLoading && !isModalOpen) {
+    console.log("Is loading and not modal open");
     return (
       <div className="rounded-lg border border-[#2D3A5C] bg-[#0B1638] p-4 shadow-lg">
         <div className="text-center py-6 text-white/60">Loading...</div>
@@ -181,10 +211,22 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
 
   const statusColors: Record<string, string> = {
     PENDING: "bg-yellow-300 text-black",
+    COUNTER_OFFER: "bg-blue-300 text-black",
     APPROVED: "bg-green-400 text-black",
     REJECTED: "bg-red-300 text-black",
     NEW_RESPONSE: "bg-yellow-300 text-black",
-    RESCINDED: "bg-yellow-300 text-black",
+    RESCINDED: "bg-gray-300 text-black",
+  };
+
+  const formatStatusText = (status: string) => {
+    switch (status) {
+      case "COUNTER_OFFER":
+        return "COUNTER OFFER MADE";
+      case "NEW_RESPONSE":
+        return "NEW RESPONSE";
+      default:
+        return status;
+    }
   };
 
   return (
@@ -232,14 +274,22 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
                       {record.date ? formatDate(record.date) : "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm font-semibold text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          statusColors[record.status] ||
-                          "bg-gray-700 text-white"
-                        }`}
-                      >
-                        {record.status || "Unknown"}
-                      </span>
+                      <div className="flex flex-col gap-1 items-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            statusColors[record.status] ||
+                            "bg-gray-700 text-white"
+                          }`}
+                        >
+                          {formatStatusText(record.status) || "Unknown"}
+                        </span>
+                        {record.otherBanksHaveMadeCounterResponse &&
+                          record.status !== "RESCINDED" && (
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-400 text-black">
+                              COMPETING OFFERS MADE
+                            </span>
+                          )}
+                      </div>
                     </td>
                   </tr>
                 );

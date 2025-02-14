@@ -63,6 +63,54 @@ const MetricsGrid = ({ data }) => (
   </div>
 );
 
+const CounterOfferSection = ({ loanResponses }) => {
+  if (!loanResponses || loanResponses.length === 0) return null;
+
+  return (
+    <div>
+      <h3 className="text-sm font-medium mb-2">Counter Offers</h3>
+      {loanResponses.map((response, index) => (
+        <div key={index} className="mb-4 last:mb-0">
+          <div className="bg-[#0B1638] p-3 rounded">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-medium">{response.bank}</span>
+              <span
+                className={`text-sm ${
+                  response.status === "COUNTER_OFFER"
+                    ? "text-yellow-400"
+                    : response.status === "APPROVED"
+                    ? "text-green-400"
+                    : response.status === "REJECTED"
+                    ? "text-red-400"
+                    : "text-white"
+                }`}
+              >
+                {response.status}
+              </span>
+            </div>
+            <InfoRow label="Amount" value={formatCurrency(response.amount)} />
+            <InfoRow label="Loan Term" value={response.loanTerm} />
+            <InfoRow label="Repayment Plan" value={response.repaymentPlan} />
+            {response.reason && (
+              <InfoRow label="Reason" value={response.reason} />
+            )}
+            {/* {response.rejectionReason && (
+              <InfoRow
+                label="Rejection Reason"
+                value={response.rejectionReason}
+              />
+            )} */}
+            <InfoRow
+              label="Response Date"
+              value={formatDate(response.statusDate)}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export function LoanDetailsModal({
   isOpen,
   onClose,
@@ -159,7 +207,7 @@ export function LoanDetailsModal({
                 }`}
               >
                 {console.log(loanDetails)}
-                {status || "PENDING"}
+                {/* {status || "PENDING"} */}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -185,14 +233,14 @@ export function LoanDetailsModal({
             <Card className="bg-[#142144] border-[#2D3A5C]">
               <CardContent className="p-4 space-y-4">
                 <div>
-                  {rejectionReason ? (
+                  {/* {rejectionReason && (
                     <div className="mb-2">
                       <InfoRow
                         label="Rejection reason"
                         value={rejectionReason}
                       />
                     </div>
-                  ) : null}
+                  )} */}
                   <h3 className="text-sm font-medium mb-2">Loan Details</h3>
                   <InfoRow label="Title" value={loanDetails.loanTitle} />
                   <InfoRow
@@ -206,6 +254,13 @@ export function LoanDetailsModal({
                     value={loanDetails.repaymentPlan}
                   />
                 </div>
+
+                {loanDetails.loanResponses &&
+                  loanDetails.loanResponses.length > 0 && (
+                    <CounterOfferSection
+                      loanResponses={loanDetails.loanResponses}
+                    />
+                  )}
 
                 <div>
                   <h3 className="text-sm font-medium mb-2">
