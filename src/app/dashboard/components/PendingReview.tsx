@@ -50,7 +50,7 @@ export default function PendingReview({ data }: PendingReviewProps) {
           hover:bg-[#ffc400] hover:shadow-lg hover:scale-[1.02]
           active:bg-[#f0b900] active:scale-[0.98] active:shadow-md"
         >
-          View requests
+          View all requests
         </button>
       </div>
     </div>
