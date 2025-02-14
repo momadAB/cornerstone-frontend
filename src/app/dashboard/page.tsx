@@ -6,7 +6,6 @@ const page = () => {
   return (
     <div>
       <Dashboard />
-      <Chat></Chat>
     </div>
   );
 };

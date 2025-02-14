@@ -1,3 +1,5 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
@@ -11,7 +13,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        maven: ['"Maven Pro"', "sans-serif"], // Add Maven Pro font
+        sans: ['"Maven Pro"', ...defaultTheme.fontFamily.sans], // Add Maven Pro font
       },
       colors: {
         gold: {

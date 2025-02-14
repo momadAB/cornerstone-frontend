@@ -10,6 +10,8 @@ import { LoanDetailsModal } from "../LoanRequestDetails/LoanDetailsModalProps";
 interface HistoryTableProps {
   status: string;
   searchQuery?: string;
+  recordsPerPage?: number;
+  showPagination?: boolean;
 }
 
 export interface HistoryRecord {
@@ -25,7 +27,12 @@ export interface HistoryRecord {
   loanResponseStatus: string;
 }
 
-export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
+export function HistoryTable({
+  status,
+  searchQuery = "",
+  recordsPerPage = 8,
+  showPagination = true,
+}: HistoryTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [historyData, setHistoryData] = useState<HistoryRecord[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -33,7 +40,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const recordsPerPage = 8;
+  // const recordsPerPage = 8;
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isModalOpenRef = useRef(false);
@@ -230,11 +237,11 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
   };
 
   return (
-    <div className="rounded-lg border border-[#2D3A5C] bg-[#0B1638] p-4 shadow-lg">
-      <div className="overflow-x-auto">
+    <div className="">
+      <div className="overflow-x-auto rounded-lg">
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="border-b border-[#2D3A5C] bg-[#142144] text-white/80 text-sm uppercase tracking-wide">
+            <tr className="border-b border-[#2D3A5C] bg-[#0F293E] text-white/80 text-sm uppercase tracking-wide">
               {columns.map(({ label, width }) => (
                 <th
                   key={label}
@@ -250,12 +257,11 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
             {historyData.length > 0 ? (
               historyData.map((record, index) => {
                 const isEvenRow = index % 2 === 0;
-                const rowColor = isEvenRow ? "bg-[#0B1638]" : "bg-[#1A2C50]";
-
+                const rowColor = isEvenRow ? "bg-[#184466]" : "bg-[#133652]";
                 return (
                   <tr
                     key={record.id}
-                    className={`border-b border-[#2D3A5C] ${rowColor} hover:bg-[#2f4880] transition-all cursor-pointer`}
+                    className={`border-b border-[#2D3A5C] ${rowColor} hover:bg-[#1D5580] transition-all cursor-pointer`}
                     onClick={() => handleRowClick(record.id)}
                   >
                     <td className="py-3 px-1 text-sm text-white font-semibold text-center">
@@ -309,7 +315,7 @@ export function HistoryTable({ status, searchQuery = "" }: HistoryTableProps) {
         onClose={() => setIsModalOpen(false)}
         loanId={selectedLoanId}
       />
-      {totalPages > 1 && (
+      {totalPages > 1 && showPagination && (
         <TablePagination
           currentPage={currentPage}
           totalPages={totalPages}
