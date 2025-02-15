@@ -1,6 +1,5 @@
 "use client";
 
-// components/layout/LayoutWrapper.tsx
 import { usePathname } from "next/navigation";
 import { SearchProvider } from "@/components/SearchBar/SearchContext";
 import Upbar from "@/components/SearchBar/Upbar";
@@ -8,9 +7,13 @@ import SideBar from "@/components/NavBar/SideBar";
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/login" || pathname === "/signup";
 
-  if (isAuthPage) {
+  // Check for auth pages and chat subpages
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isChatSubPage = pathname.startsWith("/chat/") && pathname !== "/chat";
+
+  // Use minimal layout for auth pages and chat subpages
+  if (isAuthPage || isChatSubPage) {
     return (
       <div className="min-h-screen">
         <div className="absolute inset-0 nav-pattern opacity-[0.02]" />
@@ -19,6 +22,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Full layout for all other pages
   return (
     <SearchProvider>
       <div className="flex min-h-screen">

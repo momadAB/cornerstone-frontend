@@ -196,7 +196,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     setIsVideoCallModalOpen(true);
 
     // Send a message indicating that the user is calling
-    const callMessage = `${currentUser.sub} is calling`;
+    const callMessage = `${currentUser.banker.firstName} is calling`;
 
     const newMessageObj: Message = {
       id: Date.now(),

@@ -16,6 +16,8 @@ const ZegoRoom = ({ roomID }: { roomID: string }) => {
         const userId = user.sub;
         const userName = user.sub;
 
+        console.log(user);
+
         console.log(roomID);
 
         // Get token from your backend
