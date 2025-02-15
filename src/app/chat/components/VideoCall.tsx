@@ -5,7 +5,7 @@ import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { getZegoToken } from "@/app/api/actions/chat";
 import { getUser } from "@/lib/token";
 
-const ZegoRoom = () => {
+const ZegoRoom = ({ roomID }: { roomID: string }) => {
   const roomContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -16,8 +16,7 @@ const ZegoRoom = () => {
         const userId = user.sub;
         const userName = user.sub;
 
-        // Generate a random room ID if not provided
-        const roomId = `123`;
+        console.log(roomID);
 
         // Get token from your backend
         const token = await getZegoToken();
@@ -26,7 +25,7 @@ const ZegoRoom = () => {
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
           1621616120, // Your app ID
           token as string,
-          roomId,
+          roomID,
           userId,
           userName
         );
@@ -38,7 +37,7 @@ const ZegoRoom = () => {
         const sharedLinks = [
           {
             name: "Personal link",
-            url: `${window.location.origin}${window.location.pathname}?roomID=${roomId}`,
+            url: `${window.location.origin}${window.location.pathname}?roomID=${roomID}`,
           },
         ];
 
@@ -72,11 +71,8 @@ const ZegoRoom = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="p-4 bg-gray-800 text-white">
-        <h1 className="text-xl font-bold">Video Call Room</h1>
-      </div>
-      <div ref={roomContainerRef} className="flex-1 w-full bg-gray-900" />
+    <div className="flex flex-col h-[calc(100%-1.25rem)]">
+      <div ref={roomContainerRef} className="flex-1 w-full bg-transparent" />
     </div>
   );
 };
