@@ -123,6 +123,16 @@ export async function getPossibleBusinessesToChatWith(): Promise<BusinessesDTO> 
   }
 }
 
+export async function getZegoToken(): Promise<String> {
+  try {
+    const response = await axiosInstance.get(`/zego/token`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching token:", error);
+    throw new Error(error.response?.data?.message || "Failed to token");
+  }
+}
+
 export async function getPendingBusinessLoanRequests(
   businessOwnerId: number
 ): Promise<LoanRequestsDTO> {

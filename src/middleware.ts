@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUser } from "./lib/token";
 
+const ALLOWED_ROUTES = [
+  "/chat",
+  "/chat/test",
+  "/dashboard",
+  "/dashboard/testdash",
+  "/dashboard/testdashtwo",
+  "/history",
+  "/login",
+  "/signup",
+];
+
 export async function middleware(req: NextRequest) {
   const user = await getUser();
   const pathname = req.nextUrl.pathname;
@@ -12,11 +23,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  if (!ALLOWED_ROUTES.includes(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   // Allow access to the requested route if the user is authenticated
   return NextResponse.next();
 }
 
-// Apply the middleware to specific routes
+// Apply middleware to all routes that should be protected
 export const config = {
-  matcher: ["/"], // Replace with your protected routes
+  matcher: [
+    "/",
+    "/chat/:path*",
+    "/dashboard/:path*",
+    "/history/:path*",
+    "/login",
+    "/signup",
+  ],
 };
