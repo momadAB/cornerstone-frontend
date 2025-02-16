@@ -9,6 +9,9 @@ import PendingReview from "./PendingReview";
 import RecentRequests from "./RecentRequests";
 import RecentChats from "./RecentChats";
 import RecentHistory from "./RecentHistory";
+import RecentNotifications from "./RecentNotifications";
+import { HistoryTable } from "@/components/HistoryComponents/history-table";
+import { Banknote } from "lucide-react";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
@@ -48,16 +51,35 @@ export default function Dashboard() {
     return <div className="text-center">No data available</div>;
   }
 
+  console.log(dashboardData);
+
   return (
-    <div className="container mx-auto px-4 py-8 text-black">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="container mx-auto px-4 text-black">
+      <div className="flex flex-col md:flex-row gap-8 mb-8">
+        {" "}
+        <RecentNotifications notifications={dashboardData.notifications} />
         <PendingReview data={dashboardData.pendingReview} />
+      </div>
+      <div className="flex flex-col md:flex-row gap-8 mb-8">
+        {/* <RecentHistory history={dashboardData.recentHistory} /> */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-2 ml-5">
+            <Banknote className="text-[#FFD700]" size={20} />
+            <p className="text-white font-extrabold text-lg">New Requests</p>
+          </div>
+          <HistoryTable
+            status="null"
+            recordsPerPage={5}
+            showPagination={false}
+          />
+        </div>
+      </div>
+      {/* <div className="flex flex-col md:flex-row gap-8 mb-8">
+        <RecentChats chats={dashboardData.fourMostRecentChats} />
         <RecentRequests
           requests={dashboardData.fiveMostRecentRequests.requests}
         />
-        <RecentChats chats={dashboardData.fourMostRecentChats} />
-        <RecentHistory history={dashboardData.recentHistory} />
-      </div>
+      </div> */}
     </div>
   );
 }

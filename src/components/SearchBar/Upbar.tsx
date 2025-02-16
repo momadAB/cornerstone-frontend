@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   Clock,
@@ -11,6 +11,7 @@ import {
   ScrollText,
 } from "lucide-react";
 import SearchBar from "../ChatComponents/ChatSidebar/SearchBar";
+import { getUser } from "@/lib/token";
 
 const ICONS = {
   requests: ScrollText,
@@ -32,7 +33,16 @@ const PAGE_DETAILS: Record<
 };
 
 export default function Upbar() {
+  const [bank, setBank] = useState("");
   const pathname = usePathname();
+  useEffect(() => {
+    const loadUserBank = async () => {
+      const user = await getUser();
+      setBank(user?.bank);
+      // console.log("user:", user);
+    };
+    loadUserBank();
+  });
 
   // ✅ Memoize page title and icon lookup
   const { title, icon } = useMemo(
@@ -52,6 +62,9 @@ export default function Upbar() {
       {/* 🔍 SearchBar & 🔔 Notifications */}
       <div className="flex items-center gap-4">
         {/* <SearchBar /> */}
+        <h1 className="text-xl font-semibold flex items-center gap-2 text-white">
+          {bank}
+        </h1>
 
         {/* 🔔 Notification Button with Consistent Icon Handling */}
         <button

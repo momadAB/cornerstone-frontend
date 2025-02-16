@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,8 @@ import {
   LoanRequest,
 } from "@/app/api/actions/chat";
 import { LoanRequestsModal } from "./LoanRequestsModal";
-import { getToken, getUser } from "@/lib/token";
-import SockJS from "sockjs-client";
-import { over } from "stompjs";
-import { WEBSOCKET_BASEURL } from "@/lib/utils";
-
-let stompClient = null;
+import { getUser } from "@/lib/token";
+import VideoCallModal from "./VideoCallModal";
 
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
@@ -55,176 +51,95 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const [newMessage, setNewMessage] = useState("");
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
-  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const [processedMessageIds] = useState(new Set());
+  const [isVideoCallModalOpen, setIsVideoCallModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastMessageIdRef = useRef<number | null>(null);
+  const userScrolledRef = useRef(false);
 
-  useEffect(() => {
-    console.log("always chat", chatData);
-  }, [chatData]);
+  const shouldScrollToBottom = (data: ChatData) => {
+    if (!data.messages.length) return false;
 
-  const initializeWebSocket = async () => {
-    try {
-      const token = await getToken();
-      const user = await getUser();
-      setCurrentUser(user);
+    const lastMessage = data.messages[data.messages.length - 1];
 
-      const socket = new SockJS(`${WEBSOCKET_BASEURL}?token=${token}`);
-      stompClient = over(socket);
-      stompClient.debug = null;
-
-      if (stompClient.connected) {
-        stompClient.disconnect();
-      }
-
-      return new Promise((resolve, reject) => {
-        stompClient.connect(
-          {},
-          (frame) => {
-            console.log("Connected to WebSocket");
-            setTimeout(() => {
-              try {
-                const subscription = stompClient.subscribe(
-                  "/user/topic/queue",
-                  onMessageReceived
-                );
-                setSubscriptionId(subscription.id);
-                setIsWebSocketConnected(true);
-                resolve(true);
-              } catch (err) {
-                console.error("Subscription error:", err);
-                reject(err);
-              }
-            }, 1000);
-          },
-          (error) => {
-            console.error("WebSocket connection error:", error);
-            reject(error);
-          }
-        );
-      });
-    } catch (error) {
-      console.error("WebSocket initialization error:", error);
-      throw error;
+    // Always scroll if it's a new message from the current user
+    if (lastMessage.isYou) {
+      return true;
     }
+
+    // Check if there's a new message from the other user
+    if (lastMessageIdRef.current !== lastMessage.id) {
+      // Only auto-scroll if the user hasn't manually scrolled up
+      if (!userScrolledRef.current) {
+        lastMessageIdRef.current = lastMessage.id;
+        return true;
+      }
+    }
+
+    return false;
   };
 
-  // Initialize WebSocket connection
-  useEffect(() => {
-    let mounted = true;
+  // Handle scroll events
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.target as HTMLDivElement;
+    const isScrolledToBottom =
+      Math.abs(
+        element.scrollHeight - element.scrollTop - element.clientHeight
+      ) < 50;
 
-    const connect = async () => {
-      try {
-        if (mounted) {
-          await initializeWebSocket();
-        }
-      } catch (error) {
-        console.error("Failed to initialize WebSocket:", error);
-        if (mounted) {
-          setTimeout(connect, 3000);
-        }
-      }
-    };
+    userScrolledRef.current = !isScrolledToBottom;
 
-    connect();
-
-    return () => {
-      mounted = false;
-      if (subscriptionId && stompClient) {
-        stompClient.unsubscribe(subscriptionId);
-      }
-      if (stompClient && stompClient.connected) {
-        stompClient.disconnect();
-      }
-    };
-  }, []);
-
-  // Handle incoming WebSocket messages
-  const onMessageReceived = (payload) => {
-    try {
-      console.log("WebSocket message received:", payload);
-      const data = JSON.parse(payload.body);
-      console.log("Parsed WebSocket data:", data);
-
-      // Create a more stable message ID using a combination of properties
-      const messageKey = JSON.stringify({
-        sender: data.senderName,
-        recipient: data.recipientName,
-        message: data.message,
-        business: data.businessName,
-      });
-
-      console.log("Generated message key:", messageKey);
-
-      // Skip if we've already processed this message
-      if (processedMessageIds.has(messageKey)) {
-        console.log("Duplicate message detected, skipping. Key:", messageKey);
-        return;
-      }
-
-      // Add to processed messages
-      processedMessageIds.add(messageKey);
-      console.log("Added message key to processed set:", messageKey);
-
-      const newMessageObj: Message = {
-        id: Date.now(),
-        message: data.message,
-        sentAt: new Date().toISOString(),
-        isYou: data.senderName === currentUser?.sub,
-        senderFirstName: data.senderFirstName, // Use the received first name
-      };
-
-      console.log("Created message object:", newMessageObj);
-
-      setChatData((prevData) => {
-        if (!prevData) {
-          console.log("No previous chat data available");
-          return prevData;
-        }
-        console.log("Updating chat with new message");
-        return {
-          ...prevData,
-          messages: [...prevData.messages, newMessageObj],
-        };
-      });
-    } catch (error) {
-      console.error("Error processing WebSocket message:", error);
+    // If user scrolls to bottom, reset the scroll flag
+    if (isScrolledToBottom) {
+      userScrolledRef.current = false;
     }
   };
-
-  // Fetch initial chat data
-  useEffect(() => {
-    async function loadChat() {
-      try {
-        console.log("Fetching chat data for chatId:", chatId);
-        const data = await getChatMessages(chatId);
-        console.log("Received chat data:", data);
-        if (!data) {
-          console.error("No chat data received");
-          return;
-        }
-        setChatData(data);
-      } catch (error) {
-        console.error("Failed to load chat:", error);
-      }
-    }
-
-    if (chatId) {
-      loadChat();
-    } else {
-      console.error("No chatId provided");
-    }
-  }, [chatId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [chatData?.messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  async function loadChat() {
+    try {
+      const data = await getChatMessages(chatId);
+      if (!data) return;
+
+      // Update chat data and check if we should scroll
+      setChatData((prevData) => {
+        if (!prevData) {
+          // First load - scroll to bottom
+          setTimeout(scrollToBottom, 100);
+          return data;
+        }
+
+        const shouldScroll = shouldScrollToBottom(data);
+        if (shouldScroll) {
+          setTimeout(scrollToBottom, 100);
+        }
+
+        return data;
+      });
+    } catch (error) {
+      console.error("Failed to load chat:", error);
+    }
+  }
+
+  // Initial chat data load and polling setup
+  useEffect(() => {
+    if (chatId) {
+      loadChat();
+      const pollInterval = setInterval(loadChat, 3000);
+
+      // Load current user
+      const loadCurrentUser = async () => {
+        const user = await getUser();
+        setCurrentUser(user);
+      };
+      loadCurrentUser();
+
+      return () => clearInterval(pollInterval);
+    }
+  }, [chatId]);
 
   const fetchLoanRequests = async () => {
     if (chatData?.businessOwner?.id) {
@@ -241,9 +156,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !chatData || !isWebSocketConnected) return;
-
-    console.log("chatdata: ", chatData);
+    if (!newMessage.trim() || !chatData) return;
 
     const newMessageObj: Message = {
       id: Date.now(),
@@ -252,42 +165,25 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       isYou: true,
       senderFirstName: currentUser?.roles.includes("BANKER")
         ? chatData.banker.firstName
-        : chatData.businessOwner.firstName, // Add this line
+        : chatData.businessOwner.firstName,
     };
 
-    // Optimistically update UI
+    // Update local state and scroll
     setChatData((prevData) => ({
       ...prevData!,
       messages: [...prevData!.messages, newMessageObj],
     }));
 
+    // Reset user scroll flag when sending a message
+    userScrolledRef.current = false;
+    setTimeout(scrollToBottom, 100);
+
     try {
-      // Send message through REST API
       await sendMessageToChat(chatId, newMessage);
-
-      console.log(currentUser);
-
-      // Send message through WebSocket
-      const chatMessage = {
-        senderName: currentUser?.sub,
-        recipientName: chatData.businessOwner.username,
-        message: newMessage,
-        senderRole: currentUser?.roles,
-        type: "NEW_MESSAGE",
-        businessName: chatData.businessOwner.business,
-        senderFirstName: currentUser?.roles.includes("BANKER")
-          ? chatData.banker.firstName
-          : chatData.businessOwner.firstName, // Add this line
-      };
-
-      console.log("Sending WebSocket message:", chatMessage);
-      stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-      console.log("WebSocket message sent");
+      setNewMessage("");
     } catch (error) {
       console.error("Failed to send message:", error);
     }
-
-    setNewMessage("");
   };
 
   if (!chatData) return <div className="text-white">Loading...</div>;
@@ -295,6 +191,40 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const capitalize = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
+
+  const handleClickVideoCall = async () => {
+    setIsVideoCallModalOpen(true);
+
+    // Send a message indicating that the user is calling
+    const callMessage = `${currentUser.banker.firstName} is calling`;
+
+    const newMessageObj: Message = {
+      id: Date.now(),
+      message: callMessage,
+      sentAt: new Date().toISOString(),
+      isYou: true,
+      senderFirstName: currentUser?.roles.includes("BANKER")
+        ? chatData.banker.firstName
+        : chatData.businessOwner.firstName,
+    };
+
+    // Update local state
+    setChatData((prevData) => ({
+      ...prevData!,
+      messages: [...prevData!.messages, newMessageObj],
+    }));
+
+    // Reset user scroll flag and scroll to bottom
+    userScrolledRef.current = false;
+    setTimeout(scrollToBottom, 100);
+
+    try {
+      await sendMessageToChat(chatId, callMessage);
+    } catch (error) {
+      console.error("Failed to send call message:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100%-1.25rem)] bg-gray-900 border-[#7B7B7B] border-l-2 border-b-2 border-t-2 rounded-tl-lg mt-8 z-30">
       <div className="flex items-center justify-between px-6 py-4 bg-[#0F1624] border-b border-gray-700 rounded-tl-xl">
@@ -316,14 +246,6 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          {/* WebSocket Status Indicator */}
-          <div
-            className={`px-2 py-1 rounded text-sm ${
-              isWebSocketConnected ? "bg-green-500" : "bg-red-500"
-            }`}
-          >
-            {isWebSocketConnected ? "Connected" : "Disconnected"}
-          </div>
           <Button
             variant="outline"
             className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-yellow-400"
@@ -337,7 +259,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           <Button
             variant="outline"
             className="bg-gray-700 hover:bg-gray-600 border-gray-600 p-2"
-            onClick={() => console.log("Video call clicked")}
+            onClick={handleClickVideoCall}
           >
             <Video className="text-yellow-400 w-28 h-28" />
           </Button>
@@ -351,46 +273,108 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       />
 
       <div className="flex-1 min-w-0 bg-[url('/ChatBackground.png')] bg-repeat pt-5 px-5 overflow-y-auto">
-        {chatData.messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex items-start space-x-2 ${
-              message.isYou ? "flex-row-reverse space-x-reverse" : "flex-row"
-            }`}
-          >
-            <div
-              className={`flex-shrink-0 
-              ${message.isYou ? "ml-2" : "mr-2"}`}
-            >
-              <Image
-                src={DEFAULT_AVATAR}
-                alt={`${message.senderFirstName}'s avatar`}
-                width={40}
-                height={40}
-                className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
-              />
-            </div>
-            <div
-              className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative px-3 
-                ${
+        {chatData.messages.map((message) => {
+          const isCallMessage = message.message.endsWith("is calling");
+
+          if (isCallMessage) {
+            return (
+              <div
+                key={message.id}
+                className={`flex items-start space-x-2 ${
                   message.isYou
-                    ? "bg-[#FFD700] text-black before:border-[#FFD700] before:right-[-8px]"
-                    : "bg-[#E6E5EB] text-black before:border-[#E6E5EB] before:left-[-8px]"
-                } before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
-                ${
-                  message.isYou
-                    ? "before:border-l-[16px] before:border-r-0"
-                    : "before:border-r-[16px] before:border-l-0"
+                    ? "flex-row-reverse space-x-reverse"
+                    : "flex-row"
                 }`}
+              >
+                <div
+                  className={`flex-shrink-0 
+          ${message.isYou ? "ml-2" : "mr-2"}`}
+                >
+                  <Image
+                    src={DEFAULT_AVATAR}
+                    alt={`${message.senderFirstName}'s avatar`}
+                    width={40}
+                    height={40}
+                    className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                </div>
+                <div
+                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative 
+            bg-gradient-to-r from-yellow-400 to-yellow-500 text-black
+            before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
+            ${
+              message.isYou
+                ? "before:border-l-[16px] before:border-r-0 before:right-[-8px] before:border-l-yellow-400"
+                : "before:border-r-[16px] before:border-l-0 before:left-[-8px] before:border-r-yellow-400"
+            }`}
+                >
+                  <div className="flex flex-col space-y-2">
+                    <p className="font-bold">
+                      {capitalize(message.senderFirstName)}
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <Video className="w-5 h-5" />
+                      <p>Started a video call</p>
+                    </div>
+                    <Button
+                      onClick={() => setIsVideoCallModalOpen(true)}
+                      className="bg-white hover:bg-gray-100 text-black font-semibold py-2 px-4 rounded-lg flex items-center space-x-2 w-auto"
+                    >
+                      {/* <Video className="w-4 h-4" /> */}
+                      <span>Join Call</span>
+                    </Button>
+                    <p className="text-xs mt-1 opacity-70">
+                      {new Date(message.sentAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={message.id}
+              className={`flex items-start space-x-2 ${
+                message.isYou ? "flex-row-reverse space-x-reverse" : "flex-row"
+              }`}
             >
-              <p className="font-bold">{capitalize(message.senderFirstName)}</p>
-              <p>{message.message}</p>
-              <p className="text-xs mt-1 opacity-70">
-                {new Date(message.sentAt).toLocaleString()}
-              </p>
+              <div
+                className={`flex-shrink-0 
+        ${message.isYou ? "ml-2" : "mr-2"}`}
+              >
+                <Image
+                  src={DEFAULT_AVATAR}
+                  alt={`${message.senderFirstName}'s avatar`}
+                  width={40}
+                  height={40}
+                  className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                />
+              </div>
+              <div
+                className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative px-3 
+          ${
+            message.isYou
+              ? "bg-[#FFD700] text-black before:border-[#FFD700] before:right-[-8px]"
+              : "bg-[#E6E5EB] text-black before:border-[#E6E5EB] before:left-[-8px]"
+          } before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
+          ${
+            message.isYou
+              ? "before:border-l-[16px] before:border-r-0"
+              : "before:border-r-[16px] before:border-l-0"
+          }`}
+              >
+                <p className="font-bold">
+                  {capitalize(message.senderFirstName)}
+                </p>
+                <p>{message.message}</p>
+                <p className="text-xs mt-1 opacity-70">
+                  {new Date(message.sentAt).toLocaleString()}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
@@ -411,6 +395,11 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           </Button>
         </div>
       </form>
+      <VideoCallModal
+        isOpen={isVideoCallModalOpen}
+        onClose={() => setIsVideoCallModalOpen(false)}
+        roomId={chatId}
+      />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { getZegoToken } from "@/app/api/actions/chat";
 import { getUser } from "@/lib/token";
 
-const ZegoRoom = () => {
+const ZegoRoom = ({ roomID }: { roomID: string }) => {
   const roomContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -16,8 +16,9 @@ const ZegoRoom = () => {
         const userId = user.sub;
         const userName = user.sub;
 
-        // Generate a random room ID if not provided
-        const roomId = "123";
+        console.log(user);
+
+        console.log(roomID);
 
         // Get token from your backend
         const token = await getZegoToken();
@@ -26,7 +27,7 @@ const ZegoRoom = () => {
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
           1621616120, // Your app ID
           token as string,
-          roomId,
+          roomID,
           userId,
           userName
         );
@@ -38,7 +39,7 @@ const ZegoRoom = () => {
         const sharedLinks = [
           {
             name: "Personal link",
-            url: `${window.location.origin}${window.location.pathname}?roomID=${roomId}`,
+            url: `${window.location.origin}${window.location.pathname}?roomID=${roomID}`,
           },
         ];
 
