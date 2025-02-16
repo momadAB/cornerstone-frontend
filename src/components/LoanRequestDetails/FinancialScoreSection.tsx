@@ -36,7 +36,7 @@ const FinancialScoreSection = ({ score, businessState, assessment }) => {
             </span>
           </div>
           <div>
-            <span className="text-gray-400">Interest Rate:</span>{" "}
+            <span className="text-gray-400">Markup Rate:</span>{" "}
             <span className="font-semibold">{assessment.interestRate}</span>
           </div>
           <div>
