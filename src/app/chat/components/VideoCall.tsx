@@ -1,49 +1,36 @@
+// ZegoRoom.jsx
 "use client";
-
-import React, { useEffect, useRef } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import React, { useEffect, useRef, useState } from "react";
 import { getZegoToken } from "@/app/api/actions/chat";
 import { getUser } from "@/lib/token";
 
 const ZegoRoom = ({ roomID }: { roomID: string }) => {
   const roomContainerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeRoom = async () => {
       try {
-        // Get user information
+        const { ZegoUIKitPrebuilt } = await import(
+          "@zegocloud/zego-uikit-prebuilt"
+        );
+
         const user = await getUser();
         const userId = user.sub;
         const userName = user.sub;
 
-        console.log(user);
-
-        console.log(roomID);
-
-        // Get token from your backend
         const token = await getZegoToken();
-
-        // Generate kit token
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-          1621616120, // Your app ID
+          1621616120,
           token as string,
           roomID,
           userId,
           userName
         );
 
-        // Create ZegoUIKitPrebuilt instance
         const zp = ZegoUIKitPrebuilt.create(kitToken);
+        const sharedLinks = [];
 
-        // Generate shareable link
-        const sharedLinks = [
-          {
-            name: "Personal link",
-            url: `${window.location.origin}${window.location.pathname}?roomID=${roomID}`,
-          },
-        ];
-
-        // Join room
         if (roomContainerRef.current) {
           await zp.joinRoom({
             container: roomContainerRef.current,
@@ -54,7 +41,7 @@ const ZegoRoom = ({ roomID }: { roomID: string }) => {
             showScreenSharingButton: true,
             sharedLinks,
             branding: {
-              logoURL: "", // You can add your logo URL here
+              logoURL: "",
             },
             onUserLeave: () => {
               console.log("User left the room");
@@ -68,13 +55,12 @@ const ZegoRoom = ({ roomID }: { roomID: string }) => {
         console.error("Failed to initialize video room:", error);
       }
     };
-
     initializeRoom();
-  }, []);
+  }, [roomID]);
 
   return (
-    <div className="flex flex-col h-[calc(100%-1.25rem)]">
-      <div ref={roomContainerRef} className="flex-1 w-full bg-transparent" />
+    <div className="w-full h-full">
+      <div ref={roomContainerRef} className="w-full h-full overflow-hidden" />
     </div>
   );
 };

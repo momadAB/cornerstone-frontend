@@ -1,3 +1,4 @@
+// VideoCallModal.jsx
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,16 +34,15 @@ const VideoCallModal = ({ isOpen, onClose, roomId }) => {
   };
 
   roomId = `room_${roomId}`;
-  console.log(roomId);
 
   return (
     <div
-      className="fixed z-50 bg-gray-900 rounded-lg shadow-xl border border-yellow-400/50"
+      className="fixed z-50 bg-gray-900 rounded-lg shadow-xl border border-yellow-400/50 overflow-hidden"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: "720px",
-        height: "500px",
+        width: "1000px",
+        height: "700px",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseMove={handleMouseMove}
@@ -63,7 +63,7 @@ const VideoCallModal = ({ isOpen, onClose, roomId }) => {
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <div className="p-4">
+      <div className="p-4 h-[calc(100%-4rem)] overflow-hidden">
         <VideoCall roomID={roomId} />
       </div>
     </div>

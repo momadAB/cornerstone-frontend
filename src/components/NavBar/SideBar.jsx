@@ -14,7 +14,7 @@ import { deleteToken } from "@/lib/token";
 import { useRouter } from "next/navigation";
 
 const navigation = [
-  { href: "/requests", title: "Requests", icon: ScrollText, type: "requests" },
+  // { href: "/requests", title: "Requests", icon: ScrollText, type: "requests" },
   {
     href: "/dashboard",
     title: "Dashboard",
@@ -58,7 +58,7 @@ function SideBar() {
                 mounted ? "animate-fade-in" : "opacity-0"
               } transition-opacity duration-500 delay-100 drop-shadow-md`}
             >
-              Sh
+              $h
             </span>
             <span
               className={`text-sidebar-accent ml-0 ${

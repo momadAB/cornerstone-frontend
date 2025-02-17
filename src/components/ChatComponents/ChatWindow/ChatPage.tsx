@@ -196,7 +196,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     setIsVideoCallModalOpen(true);
 
     // Send a message indicating that the user is calling
-    const callMessage = `${currentUser.banker.firstName} is calling`;
+    const callMessage = `${currentUser.sub} is calling`;
 
     const newMessageObj: Message = {
       id: Date.now(),
@@ -300,12 +300,12 @@ export default function ChatPage({ chatId }: ChatPageProps) {
                 </div>
                 <div
                   className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative 
-            bg-gradient-to-r from-yellow-400 to-yellow-500 text-black
+            bg-[#FFD700] text-black
             before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
             ${
               message.isYou
-                ? "before:border-l-[16px] before:border-r-0 before:right-[-8px] before:border-l-yellow-400"
-                : "before:border-r-[16px] before:border-l-0 before:left-[-8px] before:border-r-yellow-400"
+                ? "before:border-l-[16px] before:border-r-0 before:right-[-8px] before:border-l-[#FFD700]"
+                : "before:border-r-[16px] before:border-l-0 before:left-[-8px] before:border-r-[#FFD700]"
             }`}
                 >
                   <div className="flex flex-col space-y-2">
