@@ -5,7 +5,7 @@ const FinancialScoreSection = ({ score, businessState, assessment }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "KWD",
     }).format(amount);
   };
 

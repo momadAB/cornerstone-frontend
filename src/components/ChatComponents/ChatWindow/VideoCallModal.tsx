@@ -41,8 +41,8 @@ const VideoCallModal = ({ isOpen, onClose, roomId }) => {
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: "720px",
-        height: "500px",
+        width: "1000px",
+        height: "700px",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseMove={handleMouseMove}

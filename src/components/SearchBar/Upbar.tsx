@@ -35,6 +35,22 @@ const PAGE_DETAILS: Record<
 export default function Upbar() {
   const [bank, setBank] = useState("");
   const pathname = usePathname();
+
+  const filterBankName = (bank: string) => {
+    // Split the string by underscore
+    const words = bank.split("_");
+
+    // Handle NOT_BANK case specially
+    if (bank === "NOT_BANK") {
+      return "Not a bank";
+    }
+
+    // Convert each word to title case (first letter uppercase, rest lowercase)
+    return words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   useEffect(() => {
     const loadUserBank = async () => {
       const user = await getUser();
@@ -63,7 +79,7 @@ export default function Upbar() {
       <div className="flex items-center gap-4">
         {/* <SearchBar /> */}
         <h1 className="text-xl font-semibold flex items-center gap-2 text-white">
-          {bank}
+          {filterBankName(bank)}
         </h1>
 
         {/* 🔔 Notification Button with Consistent Icon Handling */}

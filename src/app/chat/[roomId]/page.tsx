@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { getZegoToken } from "@/app/api/actions/chat";
 import { getUser } from "@/lib/token";
 import { useParams, useSearchParams } from "next/navigation";
@@ -35,15 +34,16 @@ const ZegoRoom = () => {
   roomId = `room_${roomId}`;
 
   useEffect(() => {
-    if (!roomId) return;
+    let zp: any; // Store the ZegoUIKitPrebuilt instance
 
-    const initializeRoom = async () => {
+    const initializeZego = async () => {
       try {
-        // Debug logging
-        console.log("Room ID:", roomId);
-        console.log("URL Token:", token);
-        console.log("Username:", urlUsername);
+        // Dynamic import
+        const { ZegoUIKitPrebuilt } = await import(
+          "@zegocloud/zego-uikit-prebuilt"
+        );
 
+        // Now you can use ZegoUIKitPrebuilt here
         const userId = urlUsername;
         const userName = urlUsername;
 
@@ -51,7 +51,6 @@ const ZegoRoom = () => {
         let zegoToken = token;
         if (!zegoToken) {
           try {
-            // Assuming getZegoToken is your backend token generation function
             zegoToken = await getZegoToken(roomId, userId);
             console.log("Backend Token:", zegoToken);
           } catch (tokenError) {
@@ -65,8 +64,6 @@ const ZegoRoom = () => {
           );
         }
 
-        console.log(userId, userName, zegoToken, roomId);
-
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
           1621616120,
           zegoToken,
@@ -75,7 +72,7 @@ const ZegoRoom = () => {
           userName
         );
 
-        const zp = ZegoUIKitPrebuilt.create(kitToken);
+        zp = ZegoUIKitPrebuilt.create(kitToken);
 
         const joinRoomConfig = {
           container: roomContainerRef.current!,
@@ -111,14 +108,17 @@ const ZegoRoom = () => {
       }
     };
 
-    initializeRoom();
+    if (roomId) {
+      initializeZego();
+    }
 
     // Cleanup function
     return () => {
-      // Add any cleanup logic here if needed
-      // For example, leaving the room when component unmounts
+      if (zp) {
+        // Add any cleanup for ZegoUIKitPrebuilt if needed
+      }
     };
-  }, [roomId, token, urlUsername]); // Added urlUsername to dependency array
+  }, [roomId, token, urlUsername]);
 
   if (error) {
     return (

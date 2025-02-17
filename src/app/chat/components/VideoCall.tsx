@@ -1,16 +1,20 @@
 // ZegoRoom.jsx
 "use client";
-import React, { useEffect, useRef } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import React, { useEffect, useRef, useState } from "react";
 import { getZegoToken } from "@/app/api/actions/chat";
 import { getUser } from "@/lib/token";
 
 const ZegoRoom = ({ roomID }: { roomID: string }) => {
   const roomContainerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeRoom = async () => {
       try {
+        const { ZegoUIKitPrebuilt } = await import(
+          "@zegocloud/zego-uikit-prebuilt"
+        );
+
         const user = await getUser();
         const userId = user.sub;
         const userName = user.sub;
