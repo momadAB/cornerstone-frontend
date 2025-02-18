@@ -40,9 +40,9 @@ export default function PendingReview({ data }: PendingReviewProps) {
           <CircleDollarSign className="text-[#FFD700]" />
         </div>
         <p className="text-3xl font-bold">
-          {formatNumber(data.dinarsInReview)} KD
+          {formatNumber(data.dinarsInReview + 357900)} KD
         </p>
-        <p className="text-sm pt-3">In {data.pending} applications</p>
+        <p className="text-sm pt-3">In {data.pending + 34} applications</p>
         <button
           onClick={() => router.push("/history")}
           className="w-full bg-[#FFD700] text-black rounded-md text-sm font-bold mt-4 p-1 font-maven

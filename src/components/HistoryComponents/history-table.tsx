@@ -6,6 +6,7 @@ import {
   LoanHistoryResponse,
 } from "@/app/api/actions/history";
 import { LoanDetailsModal } from "../LoanRequestDetails/LoanDetailsModalProps";
+import generateTestData from "./dummyData";
 
 interface HistoryTableProps {
   status: string;
@@ -27,18 +28,7 @@ export interface HistoryRecord {
   loanResponseStatus: string;
 }
 
-const dummyData = Array(50)
-  .fill(null)
-  .map((_, index) => ({
-    id: index + 1,
-    businessName: `Business ${index + 1}`,
-    businessOwner: `Owner ${index + 1}`,
-    amount: Math.floor(Math.random() * 10000) + 1, // Random amount
-    paymentPeriod: "Monthly",
-    date: new Date().toISOString(),
-    status: index % 2 === 0 ? "APPROVED" : "PENDING",
-    otherBanksHaveMadeCounterResponse: index % 3 === 0, // Randomly add competing offers
-  }));
+const dummyData = generateTestData(50);
 
 function capitalizeWords(fullName) {
   return fullName
@@ -57,7 +47,7 @@ const formatBackendStrings = (input) => {
 export function HistoryTable({
   status,
   searchQuery = "",
-  recordsPerPage = 8,
+  recordsPerPage = 6,
   showPagination = true,
 }: HistoryTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,13 +120,9 @@ export function HistoryTable({
           recordsPerPage
         );
 
-        console.log("response: ", response);
-
         if (response.status === "SUCCESS") {
           const transformedData = response.requests.map((item: any) => {
-            // Determine the status based on loanRequestStatus and loanResponseStatus
             let displayStatus = "PENDING";
-
             if (
               item.loanRequestStatus === "APPROVED" &&
               item.loanResponseStatus !== "APPROVED"
@@ -161,15 +147,42 @@ export function HistoryTable({
             };
           });
 
+          // Apply search filter to dummy data if searchQuery exists
+          const filteredDummyData = dummyData
+            .filter((item) => {
+              const matchesStatus = status === "null" || item.status === status;
+              const matchesSearch =
+                !searchQuery ||
+                item.businessName
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                item.businessOwner
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase());
+              return matchesStatus && matchesSearch;
+            })
+            .map((item) => ({
+              ...item,
+              loanRequestStatus: item.status,
+              loanResponseStatus: item.status,
+            }));
+
+          // Combine real and dummy data
+          const allData = [...transformedData, ...filteredDummyData];
+
+          // Calculate pagination
+          const startIndex = (currentPage - 1) * recordsPerPage;
+          const endIndex = startIndex + recordsPerPage;
+          const paginatedData = allData.slice(startIndex, endIndex);
+
           if (
             !isModalOpenRef.current &&
-            hasDataChanged(transformedData, previousDataRef.current)
+            hasDataChanged(paginatedData, previousDataRef.current)
           ) {
-            console.log("Updating data");
-            if (!isModalOpenRef.current) setIsLoading(true);
-            setHistoryData(transformedData);
-            setTotalRecords(response.totalRecords);
-            previousDataRef.current = transformedData;
+            console.log("Total records:", allData.length);
+            setHistoryData(paginatedData);
+            setTotalRecords(allData.length);
+            previousDataRef.current = paginatedData;
           }
         }
       } catch (err) {
@@ -263,7 +276,6 @@ export function HistoryTable({
     }
   };
 
-
   const filteredDummyData = dummyData.filter(
     (item) => item.status === status || status === "null"
   );
@@ -303,60 +315,6 @@ export function HistoryTable({
           <tbody>
             {historyData.length > 0 ? (
               historyData.map((record, index) => {
-                const isEvenRow = index % 2 === 0;
-                const rowColor = isEvenRow ? "bg-[#184466]" : "bg-[#133652]";
-                return (
-                  <tr
-                    key={record.id}
-                    className={`border-b border-[#2D3A5C] ${rowColor} hover:bg-[#1D5580] transition-all cursor-pointer`}
-                    onClick={() => handleRowClick(record.id)}
-                  >
-                    <td className="py-3 px-1 text-sm text-white font-semibold text-center">
-                      {record.businessName || "N/A"}
-                    </td>
-                    <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {capitalizeWords(record.businessOwner) || "N/A"}
-                    </td>
-                    <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.amount?.toLocaleString() || "N/A"} KD
-                    </td>
-                    <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {formatBackendStrings(record.paymentPeriod) || "N/A"}
-                    </td>
-                    <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.date ? formatDate(record.date) : "N/A"}
-                    </td>
-                    <td className="py-3 px-5 text-sm font-semibold text-center">
-                      <div className="flex flex-col gap-1 items-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            statusColors[record.status] ||
-                            "bg-gray-700 text-white"
-                          }`}
-                        >
-                          {formatStatusText(record.status) || "Unknown"}
-                        </span>
-                        {record.otherBanksHaveMadeCounterResponse &&
-                          record.status !== "RESCINDED" && (
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-400 text-black">
-                              COMPETING OFFERS MADE
-                            </span>
-                          )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={6} className="text-center py-6 text-white/60">
-                  No records found.
-                </td>
-              </tr>
-            )}
-            {/* Filtered Dummy Data */}
-            {filteredDummyData.length > 0 ? (
-              filteredDummyData.map((record, index) => {
                 const isEvenRow = index % 2 === 0;
                 const rowColor = isEvenRow ? "bg-[#184466]" : "bg-[#133652]";
                 return (

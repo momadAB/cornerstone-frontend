@@ -7,7 +7,7 @@ import { StatusTabs } from "@/components/HistoryComponents/status-tabs";
 import { HistoryTable } from "@/components/HistoryComponents/history-table";
 
 export default function HistoryPage() {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("null");
   const { searchQuery } = useSearch(); // ✅ Get searchQuery from context
 
   return (
