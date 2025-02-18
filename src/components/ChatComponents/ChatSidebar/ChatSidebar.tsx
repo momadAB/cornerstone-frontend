@@ -73,14 +73,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               onClick={() => onChatSelect(business.chatId)}
             >
               <div className="flex items-center space-x-3">
-                <img
+                {/* <img
                   src={
                     business.profilePicture ||
                     "/placeholder.svg?height=48&width=48"
                   }
                   alt={business.businessName}
                   className="w-12 h-12 rounded-full"
-                />
+                /> */}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
                     {business.businessName}

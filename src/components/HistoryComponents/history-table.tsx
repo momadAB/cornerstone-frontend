@@ -236,6 +236,21 @@ export function HistoryTable({
     }
   };
 
+  const filterBankName = (bank: string) => {
+    // Split the string by underscore
+    const words = bank.split("_");
+
+    // Handle NOT_BANK case specially
+    if (bank === "NOT_BANK") {
+      return "Not a bank";
+    }
+
+    // Convert each word to title case (first letter uppercase, rest lowercase)
+    return words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   return (
     <div className="">
       <div className="overflow-x-auto rounded-lg">
@@ -274,7 +289,7 @@ export function HistoryTable({
                       {record.amount?.toLocaleString() || "N/A"} KD
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.paymentPeriod || "N/A"}
+                      {filterBankName(record.paymentPeriod) || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.date ? formatDate(record.date) : "N/A"}

@@ -1,12 +1,7 @@
 import { getToken } from "@/lib/token";
 import axios from "axios";
 
-// const baseUrl =
-//   window.location.protocol === "https:"
-//     ? `https://localhost:8080`
-//     : `http://localhost:8080`;
-
-const baseUrl = `http://localhost:8080`;
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // Axios instance with base configuration
 const axiosInstance = axios.create({
