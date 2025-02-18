@@ -22,6 +22,13 @@ interface LoanDetailsModalProps {
   loanId: number | null;
 }
 
+const formatBackendStrings = (input) => {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+};
+
 const formatDate = (dateString) =>
   !dateString
     ? "N/A"
@@ -85,12 +92,18 @@ const CounterOfferSection = ({ loanResponses }) => {
                     : "text-white"
                 }`}
               >
-                {response.status}
+                {formatBackendStrings(response.status)}
               </span>
             </div>
             <InfoRow label="Amount" value={formatCurrency(response.amount)} />
-            <InfoRow label="Loan Term" value={response.loanTerm} />
-            <InfoRow label="Repayment Plan" value={response.repaymentPlan} />
+            <InfoRow
+              label="Loan Term"
+              value={formatBackendStrings(response.loanTerm)}
+            />
+            <InfoRow
+              label="Repayment Plan"
+              value={formatBackendStrings(response.repaymentPlan)}
+            />
             {response.reason && (
               <InfoRow label="Reason" value={response.reason} />
             )}
@@ -248,10 +261,13 @@ export function LoanDetailsModal({
                     value={formatCurrency(loanDetails.amount)}
                   />
                   <InfoRow label="Purpose" value={loanDetails.loanPurpose} />
-                  <InfoRow label="Term" value={loanDetails.loanTerm} />
+                  <InfoRow
+                    label="Term"
+                    value={formatBackendStrings(loanDetails.loanTerm)}
+                  />
                   <InfoRow
                     label="Repayment Plan"
-                    value={loanDetails.repaymentPlan}
+                    value={formatBackendStrings(loanDetails.repaymentPlan)}
                   />
                 </div>
 

@@ -27,6 +27,13 @@ export interface HistoryRecord {
   loanResponseStatus: string;
 }
 
+const formatBackendStrings = (input) => {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+};
+
 export function HistoryTable({
   status,
   searchQuery = "",
@@ -274,7 +281,7 @@ export function HistoryTable({
                       {record.amount?.toLocaleString() || "N/A"} KD
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.paymentPeriod || "N/A"}
+                      {formatBackendStrings(record.paymentPeriod) || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.date ? formatDate(record.date) : "N/A"}
