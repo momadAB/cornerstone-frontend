@@ -263,9 +263,25 @@ export function HistoryTable({
     }
   };
 
+
   const filteredDummyData = dummyData.filter(
     (item) => item.status === status || status === "null"
   );
+
+  const filterBankName = (bank: string) => {
+    // Split the string by underscore
+    const words = bank.split("_");
+
+    // Handle NOT_BANK case specially
+    if (bank === "NOT_BANK") {
+      return "Not a bank";
+    }
+
+    // Convert each word to title case (first letter uppercase, rest lowercase)
+    return words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
   return (
     <div className="">
