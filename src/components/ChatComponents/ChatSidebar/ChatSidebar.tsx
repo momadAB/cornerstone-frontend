@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { getPossibleBusinessesToChatWith } from "@/app/api/actions/chat";
 import Link from "next/link";
+import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
+import Image from "next/image";
 
 interface ChatSidebarProps {
   onChatSelect: (chatId: number) => void;
@@ -73,14 +75,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               onClick={() => onChatSelect(business.chatId)}
             >
               <div className="flex items-center space-x-3">
-                {/* <img
-                  src={
-                    business.profilePicture ||
-                    "/placeholder.svg?height=48&width=48"
-                  }
+                <Image
+                  src={DEFAULT_AVATAR}
                   alt={business.businessName}
                   className="w-12 h-12 rounded-full"
-                /> */}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
                     {business.businessName}
