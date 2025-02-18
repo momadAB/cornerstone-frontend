@@ -168,6 +168,13 @@ export function LoanDetailsModal({
     }
   };
 
+  const formatBackendStrings = (input) => {
+    return input
+      .toLowerCase() // Convert to lowercase
+      .replace(/_/g, " ") // Replace underscores with spaces
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+  };
+
   const handleReject = async (reason: string) => {
     try {
       await rejectLoanRequest(loanId.toString(), reason);
@@ -288,7 +295,9 @@ export function LoanDetailsModal({
                   />
                   <InfoRow
                     label="Owner"
-                    value={`${loanDetails.business.businessOwnerUser.firstName} ${loanDetails.business.businessOwnerUser.lastName}`}
+                    value={formatBackendStrings(
+                      `${loanDetails.business.businessOwnerUser.firstName}_${loanDetails.business.businessOwnerUser.lastName}`
+                    )}
                   />
                   <InfoRow
                     label="License Number"

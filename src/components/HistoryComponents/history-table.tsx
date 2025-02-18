@@ -27,6 +27,13 @@ export interface HistoryRecord {
   loanResponseStatus: string;
 }
 
+function capitalizeWords(fullName) {
+  return fullName
+    .split(" ") // Split by space
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter
+    .join(" "); // Join them back into a single string
+}
+
 const formatBackendStrings = (input) => {
   return input
     .toLowerCase() // Convert to lowercase
@@ -275,7 +282,7 @@ export function HistoryTable({
                       {record.businessName || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.businessOwner || "N/A"}
+                      {capitalizeWords(record.businessOwner) || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.amount?.toLocaleString() || "N/A"} KD
