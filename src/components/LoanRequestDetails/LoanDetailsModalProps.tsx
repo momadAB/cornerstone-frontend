@@ -210,9 +210,9 @@ export function LoanDetailsModal({
   interface DownloadButtonProps {
     fileId: string;
   }
-  const handleDownload = async (file) => {
+  const handleDownload = async (file, document) => {
     try {
-      await downloadPDF(file);
+      await downloadPDF(file, document);
       // alert("Download started!");
     } catch (error) {
       alert("Download failed!");
@@ -259,7 +259,10 @@ export function LoanDetailsModal({
               variant="ghost"
               className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
               onClick={() =>
-                handleDownload(loanDetails.business.financialStatementFileId)
+                handleDownload(
+                  loanDetails.business.financialStatementFileId,
+                  "financialStatement"
+                )
               }
             >
               <Download size={18} />
@@ -270,7 +273,10 @@ export function LoanDetailsModal({
               variant="destructive"
               className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
               onClick={() =>
-                handleDownload(loanDetails.business.businessLicenseImageFileId)
+                handleDownload(
+                  loanDetails.business.businessLicenseImageFileId,
+                  "businessLicense"
+                )
               }
             >
               <Download size={18} />
