@@ -67,7 +67,7 @@ const LoanActions = ({
   };
 
   return (
-    <div className="flex gap-2 mb-4">
+    <div className="flex gap-2 mb-4 mt-3">
       <Button
         onClick={onApprove}
         className="bg-yellow-500 hover:bg-yellow-400 text-black"
@@ -242,7 +242,7 @@ const LoanActions = ({
       <Dialog
         open={isNegotiateOpen}
         onOpenChange={setIsNegotiateOpen}
-        className="max-w-4xl"
+        className=" w-full max-w-[332rem]"
       >
         <DialogContent className="bg-[#0B1638] border border-[#2D3A5C] text-white max-h-screen overflow-y-auto">
           <DialogHeader>
