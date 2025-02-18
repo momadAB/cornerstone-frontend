@@ -7,7 +7,6 @@ import Link from "next/link";
 import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
 import Image from "next/image";
 
-const PATH_TO_DUMMY_AVATAR = "/profile/";
 interface ChatSidebarProps {
   onChatSelect: (chatId: number) => void;
   selectedChatId: number | null;
@@ -152,7 +151,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 {/* Business Avatar (Background) */}
                 <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
                   <Image
-                    src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"} // Replace with actual business avatar path
+                    src={"/business/" + business.chatId + ".png"} // Replace with actual business avatar path
                     alt={business.businessName}
                     width={40}
                     height={40}
@@ -163,7 +162,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 {/* Profile Avatar (Foreground) */}
                 <div className="relative z-10">
                   <Image
-                    src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"}
+                    src={"/profile/" + business.chatId + ".png"}
                     alt={business.businessName}
                     width={48}
                     height={48}
