@@ -103,12 +103,30 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               }`}
               onClick={() => onChatSelect(business.chatId)}
             >
-              <div className="flex items-center space-x-3">
-                <Image
-                  src={DEFAULT_AVATAR}
-                  alt={business.businessName}
-                  className="w-12 h-12 rounded-full"
-                />
+              <div className="flex items-center space-x-3 relative">
+                {/* Business Avatar (Background) */}
+                <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
+                  <Image
+                    src={DEFAULT_AVATAR} // Replace with actual business avatar path
+                    alt={business.businessName}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full opacity-90"
+                  />
+                </div>
+
+                {/* Profile Avatar (Foreground) */}
+                <div className="relative z-10">
+                  <Image
+                    src={DEFAULT_AVATAR}
+                    alt={business.businessName}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                </div>
+
+                {/* Business Info */}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
                     {business.businessName}
@@ -130,14 +148,30 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               }`}
               onClick={() => onChatSelect(business.chatId)}
             >
-              <div className="flex items-center space-x-3">
-                <Image
-                  src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"}
-                  alt={business.businessName}
-                  width={48} // 12 * 4px
-                  height={48}
-                  className="w-12 h-12 rounded-full"
-                />
+              <div className="flex items-center space-x-3 relative">
+                {/* Business Avatar (Background) */}
+                <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
+                  <Image
+                    src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"} // Replace with actual business avatar path
+                    alt={business.businessName}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full opacity-90"
+                  />
+                </div>
+
+                {/* Profile Avatar (Foreground) */}
+                <div className="relative z-10">
+                  <Image
+                    src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"}
+                    alt={business.businessName}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                </div>
+
+                {/* Business Info */}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
                     {business.businessName}
