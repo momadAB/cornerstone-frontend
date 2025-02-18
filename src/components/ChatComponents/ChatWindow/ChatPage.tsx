@@ -14,8 +14,7 @@ import { LoanRequestsModal } from "./LoanRequestsModal";
 import { getUser } from "@/lib/token";
 import VideoCallModal from "./VideoCallModal";
 
-const DEFAULT_AVATAR =
-  "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
+import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
 
 interface ChatPageProps {
   chatId: number;
@@ -229,13 +228,13 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     <div className="flex flex-col h-[calc(100%-1.25rem)] bg-gray-900 border-[#7B7B7B] border-l-2 border-b-2 border-t-2 rounded-tl-lg mt-8 z-30">
       <div className="flex items-center justify-between px-6 py-4 bg-[#0F1624] border-b border-gray-700 rounded-tl-xl">
         <div className="flex items-center space-x-4">
-          {/* <Image
+          <Image
             src={DEFAULT_AVATAR}
             alt={`${chatData.businessOwner.firstName}'s avatar`}
             width={48}
             height={48}
             className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
-          /> */}
+          />
           <div>
             <h2 className="text-xl font-semibold text-white">
               {chatData.businessOwner.business}
@@ -290,13 +289,13 @@ export default function ChatPage({ chatId }: ChatPageProps) {
                   className={`flex-shrink-0 
           ${message.isYou ? "ml-2" : "mr-2"}`}
                 >
-                  {/* <Image
+                  <Image
                     src={DEFAULT_AVATAR}
                     alt={`${message.senderFirstName}'s avatar`}
                     width={40}
                     height={40}
                     className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
-                  /> */}
+                  />
                 </div>
                 <div
                   className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative 
@@ -343,13 +342,15 @@ export default function ChatPage({ chatId }: ChatPageProps) {
                 className={`flex-shrink-0 
         ${message.isYou ? "ml-2" : "mr-2"}`}
               >
-                {/* <Image
-                  src={DEFAULT_AVATAR}
-                  alt={`${message.senderFirstName}'s avatar`}
-                  width={40}
-                  height={40}
-                  className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
-                /> */}
+                {!message.isYou && (
+                  <Image
+                    src={DEFAULT_AVATAR}
+                    alt={`${message.senderFirstName}'s avatar`}
+                    width={40}
+                    height={40}
+                    className="rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                )}
               </div>
               <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative px-3 

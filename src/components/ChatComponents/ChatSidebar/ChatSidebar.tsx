@@ -4,11 +4,43 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { getPossibleBusinessesToChatWith } from "@/app/api/actions/chat";
 import Link from "next/link";
+import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
+import DEFAULT_BUSINESS from "../../../app/assets/logo.jpeg";
+
+import Image from "next/image";
 
 interface ChatSidebarProps {
   onChatSelect: (chatId: number) => void;
   selectedChatId: number | null;
 }
+
+const dummyData = [
+  {
+    chatId: 1,
+    businessName: "PixelCraft Studios",
+    lastMessage: "Your design draft is ready for review!",
+  },
+  {
+    chatId: 2,
+    businessName: "Bean & Brews Café",
+    lastMessage: "Your coffee subscription is expiring soon!",
+  },
+  {
+    chatId: 3,
+    businessName: "SwiftFix Repairs",
+    lastMessage: "Your device repair is complete!",
+  },
+  {
+    chatId: 4,
+    businessName: "EchoTech Solutions",
+    lastMessage: "Our team is reviewing your request.",
+  },
+  {
+    chatId: 5,
+    businessName: "Nomad Outfitters",
+    lastMessage: "Check out our latest hiking gear collection!",
+  },
+];
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onChatSelect,
@@ -72,15 +104,75 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               }`}
               onClick={() => onChatSelect(business.chatId)}
             >
-              <div className="flex items-center space-x-3">
-                {/* <img
-                  src={
-                    business.profilePicture ||
-                    "/placeholder.svg?height=48&width=48"
-                  }
-                  alt={business.businessName}
-                  className="w-12 h-12 rounded-full"
-                /> */}
+              <div className="flex items-center space-x-3 relative">
+                {/* Business Avatar (Background) */}
+                <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
+                  <Image
+                    src={DEFAULT_BUSINESS} // Replace with actual business avatar path
+                    alt={business.businessName}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full opacity-90"
+                  />
+                </div>
+
+                {/* Profile Avatar (Foreground) */}
+                <div className="relative z-10">
+                  <Image
+                    src={DEFAULT_AVATAR}
+                    alt={business.businessName}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                </div>
+
+                {/* Business Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">
+                    {business.businessName}
+                  </p>
+                  <p className="text-sm opacity-70 truncate">
+                    {business.lastMessage}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+          {dummyData.map((business) => (
+            <div
+              key={business.chatId}
+              className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                selectedChatId === business.chatId
+                  ? "bg-[#182445] text-white"
+                  : "bg-transparent text-white hover:bg-[#232D4C]"
+              }`}
+              onClick={() => onChatSelect(business.chatId)}
+            >
+              <div className="flex items-center space-x-3 relative">
+                {/* Business Avatar (Background) */}
+                <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
+                  <Image
+                    src={"/business/" + business.chatId + ".png"} // Replace with actual business avatar path
+                    alt={business.businessName}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full opacity-90"
+                  />
+                </div>
+
+                {/* Profile Avatar (Foreground) */}
+                <div className="relative z-10">
+                  <Image
+                    src={"/profile/" + business.chatId + ".png"}
+                    alt={business.businessName}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full shadow-lg ring-2 ring-gray-200/20 dark:ring-gray-800/40"
+                  />
+                </div>
+
+                {/* Business Info */}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
                     {business.businessName}
