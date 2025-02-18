@@ -55,6 +55,8 @@ export default function RecentNotifications({
   // Get the notifications array safely
   const notificationList = notifications?.notifications || [];
 
+  console.log(notificationList);
+
   return (
     <>
       <div className="flex flex-col w-96">

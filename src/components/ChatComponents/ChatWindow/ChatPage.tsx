@@ -353,16 +353,17 @@ export default function ChatPage({ chatId }: ChatPageProps) {
               </div>
               <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl p-3 my-1 relative px-3 
-          ${
-            message.isYou
-              ? "bg-[#FFD700] text-black before:border-[#FFD700] before:right-[-8px]"
-              : "bg-[#E6E5EB] text-black before:border-[#E6E5EB] before:left-[-8px]"
-          } before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
-          ${
-            message.isYou
-              ? "before:border-l-[16px] before:border-r-0"
-              : "before:border-r-[16px] before:border-l-0"
-          }`}
+                  ${
+                    message.isYou
+                      ? "bg-[#FFD700] text-black before:border-[#FFD700] before:right-[-8px]"
+                      : "bg-[#E6E5EB] text-black before:border-[#E6E5EB] before:left-[-8px]"
+                  } 
+              before:content-[''] before:absolute before:top-[12px] before:border-8 before:border-t-transparent before:border-b-transparent 
+                ${
+                  message.isYou
+                    ? "before:border-l-[16px] before:border-r-0"
+                    : "before:border-r-[16px] before:border-l-0"
+                }`}
               >
                 <p className="font-bold">
                   {capitalize(message.senderFirstName)}
