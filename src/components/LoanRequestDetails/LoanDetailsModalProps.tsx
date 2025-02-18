@@ -15,6 +15,9 @@ import {
 } from "@/app/api/actions/loanRequest";
 import FinancialScoreSection from "./FinancialScoreSection";
 import LoanActions from "./LoanActionButtons";
+import { Button } from "../ui/button";
+import { downloadPDF } from "@/app/api/actions/downloadFile";
+import { Download } from "lucide-react";
 
 interface LoanDetailsModalProps {
   isOpen: boolean;
@@ -204,6 +207,18 @@ export function LoanDetailsModal({
     return <div className="text-center py-4 text-red-500">{error}</div>;
   if (!loanDetails) return null;
 
+  interface DownloadButtonProps {
+    fileId: string;
+  }
+  const handleDownload = async (file) => {
+    try {
+      await downloadPDF(file);
+      // alert("Download started!");
+    } catch (error) {
+      alert("Download failed!");
+    }
+  };
+
   const fs = loanDetails.business.financialStatement;
   const assessment = fs.financialStatementAssessment;
 
@@ -239,6 +254,29 @@ export function LoanDetailsModal({
             onCounterOffer={handleCounterOffer}
             loanResponseStatus={status}
           />
+          <div className="absolute top-4 right-4 flex space-x-2">
+            <Button
+              variant="ghost"
+              className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
+              onClick={() =>
+                handleDownload(loanDetails.business.financialStatementFileId)
+              }
+            >
+              <Download size={18} />
+              Financial Statement
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
+              onClick={() =>
+                handleDownload(loanDetails.business.businessLicenseImageFileId)
+              }
+            >
+              <Download size={18} />
+              Business License
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="overview" className="mt-0 ">
