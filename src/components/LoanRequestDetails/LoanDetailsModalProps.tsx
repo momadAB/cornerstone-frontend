@@ -45,6 +45,22 @@ const formatCurrency = (amount) => {
       })} KWD`;
 };
 
+const filterBankName = (bank: string) => {
+  console.log(bank);
+  // Split the string by underscore
+  const words = bank.split("_");
+
+  // Handle NOT_BANK case specially
+  if (bank === "NOT_BANK") {
+    return "Not a bank";
+  }
+
+  // Convert each word to title case (first letter uppercase, rest lowercase)
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const InfoRow = ({ label, value }) => (
   <div className="flex justify-between py-1.5 border-b border-[#2D3A5C] last:border-0">
     <span className="text-white/60 text-sm">{label}</span>
@@ -89,8 +105,14 @@ const CounterOfferSection = ({ loanResponses }) => {
               </span>
             </div>
             <InfoRow label="Amount" value={formatCurrency(response.amount)} />
-            <InfoRow label="Loan Term" value={response.loanTerm} />
-            <InfoRow label="Repayment Plan" value={response.repaymentPlan} />
+            <InfoRow
+              label="Loan Term"
+              value={filterBankName(response.loanTerm)}
+            />
+            <InfoRow
+              label="Repayment Plan"
+              value={filterBankName(response.repaymentPlan)}
+            />
             {response.reason && (
               <InfoRow label="Reason" value={response.reason} />
             )}
@@ -248,10 +270,13 @@ export function LoanDetailsModal({
                     value={formatCurrency(loanDetails.amount)}
                   />
                   <InfoRow label="Purpose" value={loanDetails.loanPurpose} />
-                  <InfoRow label="Term" value={loanDetails.loanTerm} />
+                  <InfoRow
+                    label="Term"
+                    value={filterBankName(loanDetails.loanTerm)}
+                  />
                   <InfoRow
                     label="Repayment Plan"
-                    value={loanDetails.repaymentPlan}
+                    value={filterBankName(loanDetails.repaymentPlan)}
                   />
                 </div>
 
