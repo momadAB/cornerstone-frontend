@@ -7,10 +7,39 @@ import Link from "next/link";
 import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
 import Image from "next/image";
 
+const PATH_TO_DUMMY_AVATAR = "/profile/";
 interface ChatSidebarProps {
   onChatSelect: (chatId: number) => void;
   selectedChatId: number | null;
 }
+
+const dummyData = [
+  {
+    chatId: 1,
+    businessName: "PixelCraft Studios",
+    lastMessage: "Your design draft is ready for review!",
+  },
+  {
+    chatId: 2,
+    businessName: "Bean & Brews Café",
+    lastMessage: "Your coffee subscription is expiring soon!",
+  },
+  {
+    chatId: 3,
+    businessName: "SwiftFix Repairs",
+    lastMessage: "Your device repair is complete!",
+  },
+  {
+    chatId: 4,
+    businessName: "EchoTech Solutions",
+    lastMessage: "Our team is reviewing your request.",
+  },
+  {
+    chatId: 5,
+    businessName: "Nomad Outfitters",
+    lastMessage: "Check out our latest hiking gear collection!",
+  },
+];
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onChatSelect,
@@ -78,6 +107,35 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 <Image
                   src={DEFAULT_AVATAR}
                   alt={business.businessName}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">
+                    {business.businessName}
+                  </p>
+                  <p className="text-sm opacity-70 truncate">
+                    {business.lastMessage}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+          {dummyData.map((business) => (
+            <div
+              key={business.chatId}
+              className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                selectedChatId === business.chatId
+                  ? "bg-[#182445] text-white"
+                  : "bg-transparent text-white hover:bg-[#232D4C]"
+              }`}
+              onClick={() => onChatSelect(business.chatId)}
+            >
+              <div className="flex items-center space-x-3">
+                <Image
+                  src={PATH_TO_DUMMY_AVATAR + business.chatId + ".png"}
+                  alt={business.businessName}
+                  width={48} // 12 * 4px
+                  height={48}
                   className="w-12 h-12 rounded-full"
                 />
                 <div className="flex-1 min-w-0">
