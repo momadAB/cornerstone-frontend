@@ -27,6 +27,33 @@ export interface HistoryRecord {
   loanResponseStatus: string;
 }
 
+const dummyData = Array(50)
+  .fill(null)
+  .map((_, index) => ({
+    id: index + 1,
+    businessName: `Business ${index + 1}`,
+    businessOwner: `Owner ${index + 1}`,
+    amount: Math.floor(Math.random() * 10000) + 1, // Random amount
+    paymentPeriod: "Monthly",
+    date: new Date().toISOString(),
+    status: index % 2 === 0 ? "APPROVED" : "PENDING",
+    otherBanksHaveMadeCounterResponse: index % 3 === 0, // Randomly add competing offers
+  }));
+
+function capitalizeWords(fullName) {
+  return fullName
+    .split(" ") // Split by space
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter
+    .join(" "); // Join them back into a single string
+}
+
+const formatBackendStrings = (input) => {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+};
+
 export function HistoryTable({
   status,
   searchQuery = "",
@@ -236,6 +263,11 @@ export function HistoryTable({
     }
   };
 
+
+  const filteredDummyData = dummyData.filter(
+    (item) => item.status === status || status === "null"
+  );
+
   const filterBankName = (bank: string) => {
     // Split the string by underscore
     const words = bank.split("_");
@@ -283,13 +315,67 @@ export function HistoryTable({
                       {record.businessName || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {record.businessOwner || "N/A"}
+                      {capitalizeWords(record.businessOwner) || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.amount?.toLocaleString() || "N/A"} KD
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
-                      {filterBankName(record.paymentPeriod) || "N/A"}
+                      {formatBackendStrings(record.paymentPeriod) || "N/A"}
+                    </td>
+                    <td className="py-3 px-5 text-sm text-white/80 text-center">
+                      {record.date ? formatDate(record.date) : "N/A"}
+                    </td>
+                    <td className="py-3 px-5 text-sm font-semibold text-center">
+                      <div className="flex flex-col gap-1 items-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            statusColors[record.status] ||
+                            "bg-gray-700 text-white"
+                          }`}
+                        >
+                          {formatStatusText(record.status) || "Unknown"}
+                        </span>
+                        {record.otherBanksHaveMadeCounterResponse &&
+                          record.status !== "RESCINDED" && (
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-400 text-black">
+                              COMPETING OFFERS MADE
+                            </span>
+                          )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center py-6 text-white/60">
+                  No records found.
+                </td>
+              </tr>
+            )}
+            {/* Filtered Dummy Data */}
+            {filteredDummyData.length > 0 ? (
+              filteredDummyData.map((record, index) => {
+                const isEvenRow = index % 2 === 0;
+                const rowColor = isEvenRow ? "bg-[#184466]" : "bg-[#133652]";
+                return (
+                  <tr
+                    key={record.id}
+                    className={`border-b border-[#2D3A5C] ${rowColor} hover:bg-[#1D5580] transition-all cursor-pointer`}
+                    onClick={() => handleRowClick(record.id)}
+                  >
+                    <td className="py-3 px-1 text-sm text-white font-semibold text-center">
+                      {record.businessName || "N/A"}
+                    </td>
+                    <td className="py-3 px-5 text-sm text-white/80 text-center">
+                      {capitalizeWords(record.businessOwner) || "N/A"}
+                    </td>
+                    <td className="py-3 px-5 text-sm text-white/80 text-center">
+                      {record.amount?.toLocaleString() || "N/A"} KD
+                    </td>
+                    <td className="py-3 px-5 text-sm text-white/80 text-center">
+                      {formatBackendStrings(record.paymentPeriod) || "N/A"}
                     </td>
                     <td className="py-3 px-5 text-sm text-white/80 text-center">
                       {record.date ? formatDate(record.date) : "N/A"}

@@ -15,12 +15,22 @@ import {
 } from "@/app/api/actions/loanRequest";
 import FinancialScoreSection from "./FinancialScoreSection";
 import LoanActions from "./LoanActionButtons";
+import { Button } from "../ui/button";
+import { downloadPDF } from "@/app/api/actions/downloadFile";
+import { Download } from "lucide-react";
 
 interface LoanDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   loanId: number | null;
 }
+
+const formatBackendStrings = (input) => {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+};
 
 const formatDate = (dateString) =>
   !dateString
@@ -85,12 +95,18 @@ const CounterOfferSection = ({ loanResponses }) => {
                     : "text-white"
                 }`}
               >
-                {response.status}
+                {formatBackendStrings(response.status)}
               </span>
             </div>
             <InfoRow label="Amount" value={formatCurrency(response.amount)} />
-            <InfoRow label="Loan Term" value={response.loanTerm} />
-            <InfoRow label="Repayment Plan" value={response.repaymentPlan} />
+            <InfoRow
+              label="Loan Term"
+              value={formatBackendStrings(response.loanTerm)}
+            />
+            <InfoRow
+              label="Repayment Plan"
+              value={formatBackendStrings(response.repaymentPlan)}
+            />
             {response.reason && (
               <InfoRow label="Reason" value={response.reason} />
             )}
@@ -155,6 +171,13 @@ export function LoanDetailsModal({
     }
   };
 
+  const formatBackendStrings = (input) => {
+    return input
+      .toLowerCase() // Convert to lowercase
+      .replace(/_/g, " ") // Replace underscores with spaces
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+  };
+
   const handleReject = async (reason: string) => {
     try {
       await rejectLoanRequest(loanId.toString(), reason);
@@ -183,6 +206,18 @@ export function LoanDetailsModal({
   if (error)
     return <div className="text-center py-4 text-red-500">{error}</div>;
   if (!loanDetails) return null;
+
+  interface DownloadButtonProps {
+    fileId: string;
+  }
+  const handleDownload = async (file, document) => {
+    try {
+      await downloadPDF(file, document);
+      // alert("Download started!");
+    } catch (error) {
+      alert("Download failed!");
+    }
+  };
 
   const fs = loanDetails.business.financialStatement;
   const assessment = fs.financialStatementAssessment;
@@ -219,6 +254,35 @@ export function LoanDetailsModal({
             onCounterOffer={handleCounterOffer}
             loanResponseStatus={status}
           />
+          <div className="absolute top-4 right-4 flex space-x-2">
+            <Button
+              variant="ghost"
+              className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
+              onClick={() =>
+                handleDownload(
+                  loanDetails.business.financialStatementFileId,
+                  "financialStatement"
+                )
+              }
+            >
+              <Download size={18} />
+              Financial Statement
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="border border-[#2D3A5C] bg-[#142144] text-white hover:bg-[#1E2A4A] hover:border-[#3A4E76] transition flex items-center gap-2"
+              onClick={() =>
+                handleDownload(
+                  loanDetails.business.businessLicenseImageFileId,
+                  "businessLicense"
+                )
+              }
+            >
+              <Download size={18} />
+              Business License
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="overview" className="mt-0 ">
@@ -248,10 +312,13 @@ export function LoanDetailsModal({
                     value={formatCurrency(loanDetails.amount)}
                   />
                   <InfoRow label="Purpose" value={loanDetails.loanPurpose} />
-                  <InfoRow label="Term" value={loanDetails.loanTerm} />
+                  <InfoRow
+                    label="Term"
+                    value={formatBackendStrings(loanDetails.loanTerm)}
+                  />
                   <InfoRow
                     label="Repayment Plan"
-                    value={loanDetails.repaymentPlan}
+                    value={formatBackendStrings(loanDetails.repaymentPlan)}
                   />
                 </div>
 
@@ -272,7 +339,9 @@ export function LoanDetailsModal({
                   />
                   <InfoRow
                     label="Owner"
-                    value={`${loanDetails.business.businessOwnerUser.firstName} ${loanDetails.business.businessOwnerUser.lastName}`}
+                    value={formatBackendStrings(
+                      `${loanDetails.business.businessOwnerUser.firstName}_${loanDetails.business.businessOwnerUser.lastName}`
+                    )}
                   />
                   <InfoRow
                     label="License Number"
