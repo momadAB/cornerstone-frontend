@@ -5,6 +5,8 @@ import { Search } from "lucide-react";
 import { getPossibleBusinessesToChatWith } from "@/app/api/actions/chat";
 import Link from "next/link";
 import DEFAULT_AVATAR from "../../../app/assets/ibrahim.png";
+import DEFAULT_BUSINESS from "../../../app/assets/logo.jpeg";
+
 import Image from "next/image";
 
 interface ChatSidebarProps {
@@ -106,7 +108,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 {/* Business Avatar (Background) */}
                 <div className="absolute w-10 h-10 -top-1 -left-1 rounded-full ring-2 ring-gray-200/20 dark:border-gray-800 shadow-md overflow-hidden">
                   <Image
-                    src={DEFAULT_AVATAR} // Replace with actual business avatar path
+                    src={DEFAULT_BUSINESS} // Replace with actual business avatar path
                     alt={business.businessName}
                     width={40}
                     height={40}
